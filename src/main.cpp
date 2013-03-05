@@ -12,7 +12,7 @@ int g_iBackHeight;
 //int g_iBackX;
 //int g_iBackY;
 
-//kamil pa³a
+//nozyk pala
 unsigned char* ReadBmpFromFile(char* szFileName,int &riWidth, int &riHeight)
 {
 	BITMAPFILEHEADER     bfh;
