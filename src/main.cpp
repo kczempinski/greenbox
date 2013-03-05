@@ -456,9 +456,12 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 						FILE_ATTRIBUTE_NORMAL,
 						(HANDLE) NULL);
 
-					char *lokalizacja2="C:\\greenbox\\bin\\blank.ppm";
-					LPSTR lokalizacja = ofn.lpstrFile;
+					
+					LPCTSTR s = ofn.lpstrDefExt;     ////to nie dzia³a, ale trzeba znaleŸæ rozwi¹zanie jak zamieniæ LPCTSTR na char*
+					char *p = const_cast<char*>(s);
+					if(p=="ppm")	  
 					g_pRGBBack = ReadPpmFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
+
 
 					break;
 			  }
