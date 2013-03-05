@@ -9,6 +9,7 @@ unsigned char *g_pRGBProcesedSample;
 unsigned char *g_ostatnie;
 
 unsigned char *g_pRGBBack;
+unsigned char *g_temp;
 int g_iBackWidth;
 int g_iBackHeight;
 //int g_iBackX;
@@ -384,7 +385,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     g_pRGBProcesedSample = new unsigned char [320*240*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
 	g_ostatnie = new unsigned char [320*240*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
 
-	g_pRGBBack = ReadPpmFromFile("back.ppm",g_iBackWidth, g_iBackHeight); //Wczyt obrazu z pliku
+	g_pRGBBack = ReadPpmFromFile("blank.ppm",g_iBackWidth, g_iBackHeight); //Wczyt obrazu z pliku
+	
     /*g_iBackX = 10;
     g_iBackY = 10;*/
 
@@ -417,48 +419,50 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			  PostQuitMessage(0);
 			  break;
 		  case ID_MENU_ABOUT:
-			  MessageBox(0,TEXT("Program napisany przez Kamila Czempiñskiego i Marcina No¿yñskiego w ramach ko³a multimedialnego"),TEXT("O programie"),MB_OK);
+			  MessageBox(0,TEXT("Program napisany przez Kamila Czempiñskiego i Marcina No¿yñskiego w ramach ko³a multimedialnego \nWersja rozwojowa"),TEXT("O programie"),MB_OK);
 			  break;
 		  case ID_MENU_LOADBACKGROUND:
 			  {
 				  OPENFILENAME ofn;       // common dialog box structure
-char szFile[260];       // buffer for file name
-//HWND hwnd;              // owner window
-HANDLE hf;              // file handle
+					char szFile[260];       // buffer for file name
+					//HWND hwnd;              // owner window
+					HANDLE hf;              // file handle
 
-// Initialize OPENFILENAME
-ZeroMemory(&ofn, sizeof(ofn));
-ofn.lStructSize = sizeof(ofn);
-ofn.hwndOwner = hwnd;
-ofn.lpstrFile = szFile;
-// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
-// use the contents of szFile to initialize itself.
-ofn.lpstrFile[0] = '\0';
-ofn.nMaxFile = sizeof(szFile);
-ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
-ofn.nFilterIndex = 1;
-ofn.lpstrFileTitle = NULL;
-ofn.nMaxFileTitle = 0;
-ofn.lpstrInitialDir = NULL;
-ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+					// Initialize OPENFILENAME
+					ZeroMemory(&ofn, sizeof(ofn));
+					ofn.lStructSize = sizeof(ofn);
+					ofn.hwndOwner = hwnd;
+					ofn.lpstrFile = szFile;
+					// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
+					// use the contents of szFile to initialize itself.
+					ofn.lpstrFile[0] = '\0';
+					ofn.nMaxFile = sizeof(szFile);
+					ofn.lpstrFilter = "PPM\0*.ppm";
+					//ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
+					ofn.nFilterIndex = 1;
+					ofn.lpstrFileTitle = NULL;
+					ofn.nMaxFileTitle = 0;
+					ofn.lpstrInitialDir = NULL;
+					ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-// Display the Open dialog box. 
+					// Display the Open dialog box. 
 
-if (GetOpenFileName(&ofn)==TRUE) 
-    hf = CreateFile(ofn.lpstrFile, 
-                    GENERIC_READ,
-                    0,
-                    (LPSECURITY_ATTRIBUTES) NULL,
-                    OPEN_EXISTING,
-                    FILE_ATTRIBUTE_NORMAL,
-                    (HANDLE) NULL);
-//string* lok = "1";
-char *lok2="C:\\greenbox\\bin\\back.ppm";
-char *lokalizacja = ofn.lpstrFile;
-	g_pRGBBack = ReadPpmFromFile(lokalizacja,g_iBackWidth, g_iBackHeight);
-		break;
+					if (GetOpenFileName(&ofn)==TRUE) 
+						hf = CreateFile(ofn.lpstrFile, 
+						GENERIC_READ,
+						0,
+						(LPSECURITY_ATTRIBUTES) NULL,
+						CREATE_NEW,
+						FILE_ATTRIBUTE_NORMAL,
+						(HANDLE) NULL);
+
+					char *lokalizacja2="C:\\greenbox\\bin\\blank.ppm";
+					LPSTR lokalizacja = ofn.lpstrFile;
+					g_pRGBBack = ReadPpmFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
+
+					break;
 			  }
-	  }
+	    }
 	  break;
 
   case WM_DESTROY:
