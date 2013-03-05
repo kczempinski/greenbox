@@ -447,7 +447,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     /*g_iBackX = 10;
     g_iBackY = 10;*/
 
-    SetTimer(hwnd,LAMB_ID_TIMER_GET_FRAME,40,NULL); //Ustawienie minutnika na co 40 milisekund
+    SetTimer(hwnd,GRINBOX_ID_TIMER_GET_FRAME,40,NULL); //Ustawienie minutnika na co 40 milisekund
 
     break;
   case WM_PAINT:
@@ -458,7 +458,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
   case WM_TIMER:
     switch(wParam)
     {
-    case LAMB_ID_TIMER_GET_FRAME:
+    case GRINBOX_ID_TIMER_GET_FRAME:
       xGetFrame(g_pRGBOriginalSample);  //Pobranie 1 ramki obrazu z kamery
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,320,240); //Wywo³anie procedury przetwarzaj¹cej obraz
       xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,320,240); //Wyœwitlenie 1 ramki obrazu na okienku
@@ -485,19 +485,19 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
   wc.hInstance = hInstance;
-  wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(LAMB_MAIN_ICON));
+  wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(GRINBOX_MAIN_ICON));
   wc.hCursor = LoadCursor(NULL, IDC_HAND);
   wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
   wc.lpszMenuName = NULL;
-  wc.lpszClassName = LAMB_APP_CLASS_NAME;
+  wc.lpszClassName = GRINBOX_APP_CLASS_NAME;
 
   //Rejestracja klasy okna
   if ( !RegisterClass( &wc ) ) return( FALSE );
 
   // Tworzenie g³ównego okna aplikacji
   HWND hWnd = CreateWindow(
-    LAMB_APP_CLASS_NAME,
-    LAMB_APP_WINDOW_NAME,
+    GRINBOX_APP_CLASS_NAME,
+    GRINBOX_APP_WINDOW_NAME,
     WS_OVERLAPPEDWINDOW,
     0,
     0,
