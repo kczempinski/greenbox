@@ -1,3 +1,17 @@
 #include "..\src\main.h"
 
 GRINBOX_MAIN_ICON ICON "icon1.ico"
+
+GRINBOX_MAIN_MENU MENU
+BEGIN
+	POPUP "&Plik"
+		BEGIN
+			MENUITEM "Wczytaj t³o",ID_MENU_LOADBACKGROUND
+			MENUITEM SEPARATOR
+			MENUITEM "E&xit",ID_MENU_EXIT
+		END
+	POPUP "P&omoc"
+		BEGIN
+			MENUITEM "&O programie...",ID_MENU_ABOUT
+		END
+END

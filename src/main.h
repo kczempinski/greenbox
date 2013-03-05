@@ -12,4 +12,10 @@
 
 #define GRINBOX_APP_WINDOW_NAME TEXT("GrinboxAppWindow")
 
+#define GRINBOX_MAIN_MENU 102
+
+#define ID_MENU_EXIT 103
+#define ID_MENU_ABOUT 104
+#define ID_MENU_LOADBACKGROUND 105
+
 #endif
