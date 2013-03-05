@@ -1,0 +1,3 @@
+#include "..\src\main.h"
+
+LAMB_MAIN_ICON ICON "icon1.ico"
