@@ -14,6 +14,8 @@ int g_iBackHeight;
 //int g_iBackX;
 //int g_iBackY;
 
+//unsigned char blank[760875];
+
 unsigned char* ReadBmpFromFile(char* szFileName,int &riWidth, int &riHeight)
 {
 	BITMAPFILEHEADER     bfh;
@@ -381,8 +383,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	g_pRGBOriginalSample = new unsigned char [320*240*3]; //Allokacja buffora pamieci na originalne próbki obrazu
     g_pRGBProcesedSample = new unsigned char [320*240*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
 	g_ostatnie = new unsigned char [320*240*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
-	g_pRGBBack = ReadBmpFromFile("back.bmp",g_iBackWidth, g_iBackHeight); //Wczyt obrazu z pliku
 
+	g_pRGBBack = ReadPpmFromFile("back.ppm",g_iBackWidth, g_iBackHeight); //Wczyt obrazu z pliku
     /*g_iBackX = 10;
     g_iBackY = 10;*/
 
@@ -451,9 +453,9 @@ if (GetOpenFileName(&ofn)==TRUE)
                     FILE_ATTRIBUTE_NORMAL,
                     (HANDLE) NULL);
 //string* lok = "1";
-char *lok2="C:\\greenbox\\bin\\bb2.bmp";
+char *lok2="C:\\greenbox\\bin\\back.ppm";
 char *lokalizacja = ofn.lpstrFile;
-	g_pRGBBack = ReadBmpFromFile(lok2,g_iBackWidth, g_iBackHeight);
+	g_pRGBBack = ReadPpmFromFile(lokalizacja,g_iBackWidth, g_iBackHeight);
 		break;
 			  }
 	  }
