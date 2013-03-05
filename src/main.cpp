@@ -228,12 +228,6 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
       float U = -0.147f*R-0.289f*G+0.437f*B;
       float V = 0.615f*R-0.515f*G+0.100f*B;
 
-      //Konwersja obrazu na odcienie szaroœci
-      /*
-      pRGBDsrSample[(y*iWidth+x)*3+0] = Y;
-      pRGBDsrSample[(y*iWidth+x)*3+1] = Y;
-      pRGBDsrSample[(y*iWidth+x)*3+2] = Y;
-      //*/
 
       //Obdœwietlenie wybranych kolorów
       /*
@@ -254,57 +248,9 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
         }
       }//*/
 
-
-/*
-      //Wyg³adzenie w blokach n x n
-      int n=1; //Rozmiar bloku im wiekszy tym bardziej wyg³adzony bêdzie obraz
-      for(int c=0;c<3;c++) //Petla po sk³adowych RGB
-      {
-        int sum = 0; //Suma próbek w bloku
-        int l   = 0; //Liczba próbek w bloku
-        for(int i=-n/2;i<=n/2;i++)
-        {
-          for(int j=-n/2;j<=n/2;j++)
-          {
-            if((y+i>0)&&(y+i<iHeight)&&(x+j>0)&&(x+j<iWidth)) //Sprawdzamy czy punku x+j y+i le¿y w obrazie
-            {
-              sum += pRGBSrcSample[((y+i)*iWidth+(x+j))*3+c];
-              l   += 1;
-            }
-          }
-        }
-       // pRGBDsrSample[(y*iWidth+x)*3+c] = sum/l; //Obliczenie œredniej wartoœci próbek w bloku
-	pRGBDsrSample[(y*iWidth+x)*3+c] = abs((pRGBDsrSample[(y*iWidth+x)*3+c]-255));    //negatyw
-      }
-*/
-
-    }
+	}
   }
 
-/*  for(int i=0; i<iHeight;i++)
-	  {
-		for(int j=0; j<iWidth;j++)
-		{
-			if (j<(iWidth/2))
-			{
-					int R = pRGBDsrSample[(i*iWidth+j)*3+2];
-					int G = pRGBDsrSample[(i*iWidth+j)*3+1];
-					int B = pRGBDsrSample[(i*iWidth+j)*3+0];
-					float Y = 0.299f*R+0.587f*G+0.114f*B;
-				pRGBDsrSample[(i*iWidth+j)*3+0] = Y;
-				pRGBDsrSample[(i*iWidth+j)*3+1] = Y;
-				pRGBDsrSample[(i*iWidth+j)*3+2] = Y;
-			}
-			else 
-			{
-				pRGBDsrSample[(i*iWidth+j)*3+0] = abs(pRGBDsrSample[(i*iWidth+j)*3+0]-255);
-				pRGBDsrSample[(i*iWidth+j)*3+1] = abs(pRGBDsrSample[(i*iWidth+j)*3+1]-255);
-				pRGBDsrSample[(i*iWidth+j)*3+2] = abs(pRGBDsrSample[(i*iWidth+j)*3+2]-255);
-			}
-		}
-
-	  }
-	 */
 
 
    for(int i=0; i<iHeight;i++)
