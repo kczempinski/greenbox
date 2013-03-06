@@ -12,6 +12,7 @@ unsigned char *g_pRGBBack;
 unsigned char *g_temp;
 int g_iBackWidth;
 int g_iBackHeight;
+int licznik_okna=0;
 
 unsigned char* ReadBmpFromFile(char* szFileName,int &riWidth, int &riHeight)
 {
@@ -395,6 +396,13 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 					// Display the Open dialog box. 
 
+					
+					if(licznik_okna==0)
+					{
+					MessageBox(0,TEXT("Obraz t³a musi byæ formatu PPM lub BMP i mieæ rozdzielczoœæ 320x240 px"),TEXT("Obraz t³a"),MB_OK);
+					a++;
+					}
+
 					if (GetOpenFileName(&ofn)==TRUE) 
 						hf = CreateFile(ofn.lpstrFile, 
 						GENERIC_READ,
@@ -404,7 +412,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 						FILE_ATTRIBUTE_NORMAL,
 						(HANDLE) NULL);
 
-					if(strstr(ofn.lpstrFile,".ppm"))	  
+					
+					if(strstr(ofn.lpstrFile,".ppm"))
 					g_pRGBBack = ReadPpmFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
 
 					if(strstr(ofn.lpstrFile,".bmp"))	  
@@ -412,6 +421,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 					if(!strstr(ofn.lpstrFile,".bmp")&&!strstr(ofn.lpstrFile,".ppm"))
 						MessageBox(0,TEXT("No to zdecyduj siê czy chcesz otworzyæ zanim bezsensownie klikasz plik->otwórz :D"),TEXT("WTF?"),MB_OK);
+
+					
 
 					break;
 			  }
