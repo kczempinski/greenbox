@@ -12,10 +12,6 @@ unsigned char *g_pRGBBack;
 unsigned char *g_temp;
 int g_iBackWidth;
 int g_iBackHeight;
-//int g_iBackX;
-//int g_iBackY;
-
-//unsigned char blank[760875];
 
 unsigned char* ReadBmpFromFile(char* szFileName,int &riWidth, int &riHeight)
 {
@@ -216,9 +212,7 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
       pRGBDsrSample[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
       pRGBDsrSample[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
       pRGBDsrSample[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
-	 // int g_iWidth=320;
-	//  int g_iHeight=240;
-	  //g_pRGBProcesedSample = ReadPpmFromFile("nature.ppm",g_iWidth, g_iHeight);
+
 	  g_ostatnie[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
 	  g_ostatnie[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
 	  g_ostatnie[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
@@ -229,31 +223,8 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
       float Y = 0.299f*R+0.587f*G+0.114f*B;
       float U = -0.147f*R-0.289f*G+0.437f*B;
       float V = 0.615f*R-0.515f*G+0.100f*B;
-
-
-      //Obdœwietlenie wybranych kolorów
-      /*
-      if((U<0)&&(V>0)&&(Y>50)&&(Y<150))
-      {
-        pRGBDsrSample[(y*iWidth+x)*3+0] = 0;
-        pRGBDsrSample[(y*iWidth+x)*3+1] = 0;
-        pRGBDsrSample[(y*iWidth+x)*3+2] = 255;
-      }//*/
-
-      //Obliczenie krawêdzi
-      /*
-      if((x>0)&&(x<iWidth-1))
-      {
-        for(int c=0;c<3;c++) //Petla po sk³adowych RGB
-        {
-          pRGBDsrSample[(y*iWidth+x)*3+c] = 2*pRGBSrcSample[(y*iWidth+x)*3+c]-pRGBSrcSample[(y*iWidth+x-1)*3+c]-pRGBSrcSample[(y*iWidth+x+1)*3+c];
-        }
-      }//*/
-
 	}
   }
-
-
 
    for(int i=0; i<iHeight;i++)
 	  {
@@ -265,30 +236,16 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 					int B = pRGBDsrSample[(i*iWidth+j)*3+0];
 					
 					float Y = 0.299f*R+0.587f*G+0.114f*B;
-				//	Y=Y-0.1;
-				//	if(Y<1)
-				//		Y=0;
-				//	float U=0.492*(B-Y);
-				//	float V=0.877*(R-Y); 
 					float U = -0.147f*R-0.289f*G+0.437f*B;
 					float V = 0.615f*R-0.515f*G+0.100f*B;
 
 					if((U<0)&&(V<0))
 					{
-						
-					/*g_ostatnie[(i*iWidth+j)*3+0] = fota[(i*iWidth+j)*3+0]; //0;
-					g_ostatnie[(i*iWidth+j)*3+1] = fota[(i*iWidth+j)*3+1]; // 0;
-					g_ostatnie[(i*iWidth+j)*3+2] = fota[(i*iWidth+j)*3+2]; //0;*/
 					
-
 					g_ostatnie[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
 					g_ostatnie[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
 					g_ostatnie[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
 
-				//	g_ostatnie[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0]; //0;
-				//	g_ostatnie[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1]; // 0;
-				//	g_ostatnie[(i*iWidth+j)*3+2] = pRGBDsrSample[(i*iWidth+j)*3+2]; //0;
-					
 					}
 					else
 					{
@@ -298,10 +255,6 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 					g_ostatnie[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
 					}
 
-					/*pRGBDsrSample[(i*iWidth+j)*3+0] = abs(pRGBDsrSample[(i*iWidth+j)*3+0]-255);
-				pRGBDsrSample[(i*iWidth+j)*3+1] = abs(pRGBDsrSample[(i*iWidth+j)*3+1]-255);
-				pRGBDsrSample[(i*iWidth+j)*3+2] = abs(pRGBDsrSample[(i*iWidth+j)*3+2]-255);  */
-			
 		}
 
 	  }
@@ -387,9 +340,6 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	g_pRGBBack = ReadPpmFromFile("blank.ppm",g_iBackWidth, g_iBackHeight); //Wczyt obrazu z pliku
 	
-    /*g_iBackX = 10;
-    g_iBackY = 10;*/
-
     SetTimer(hwnd,GRINBOX_ID_TIMER_GET_FRAME,40,NULL); //Ustawienie minutnika na co 40 milisekund
 
     break;
@@ -425,7 +375,6 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			  {
 				  OPENFILENAME ofn;       // common dialog box structure
 					char szFile[260];       // buffer for file name
-					//HWND hwnd;              // owner window
 					HANDLE hf;              // file handle
 
 					// Initialize OPENFILENAME
@@ -437,8 +386,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 					// use the contents of szFile to initialize itself.
 					ofn.lpstrFile[0] = '\0';
 					ofn.nMaxFile = sizeof(szFile);
-					ofn.lpstrFilter = "PPM\0*.ppm";
-					//ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
+					ofn.lpstrFilter = "PPM Files\0*.ppm\0BMP Files\0*.bmp\0";
 					ofn.nFilterIndex = 1;
 					ofn.lpstrFileTitle = NULL;
 					ofn.nMaxFileTitle = 0;
@@ -456,12 +404,14 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 						FILE_ATTRIBUTE_NORMAL,
 						(HANDLE) NULL);
 
-					
-					LPCTSTR s = ofn.lpstrDefExt;     ////to nie dzia³a, ale trzeba znaleŸæ rozwi¹zanie jak zamieniæ LPCTSTR na char*
-					char *p = const_cast<char*>(s);
-					if(p=="ppm")	  
+					if(strstr(ofn.lpstrFile,".ppm"))	  
 					g_pRGBBack = ReadPpmFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
 
+					if(strstr(ofn.lpstrFile,".bmp"))	  
+					g_pRGBBack = ReadBmpFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
+
+					if(!strstr(ofn.lpstrFile,".bmp")&&!strstr(ofn.lpstrFile,".ppm"))
+						MessageBox(0,TEXT("No to zdecyduj siê czy chcesz otworzyæ zanim bezsensownie klikasz plik->otwórz :D"),TEXT("WTF?"),MB_OK);
 
 					break;
 			  }
@@ -524,6 +474,5 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     DispatchMessage(&msg);
   }
 
-  //MessageBox(0,TEXT("Hejka"),TEXT("Informacja"),MB_OK);
   return 0;
 }
