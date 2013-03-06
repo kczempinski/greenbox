@@ -8,11 +8,22 @@ unsigned char *g_pRGBOriginalSample;
 unsigned char *g_pRGBProcesedSample;
 unsigned char *g_ostatnie;
 
+
+unsigned int ***g_ppp3DHistogram;
+bool g_bIsCalibrating;
+bool g_bIsGetFrame;
+
+int g_iWidth = 320;
+int g_iHeight = 240;
+int g_iCalibFrameSize =15;
+int g_iCalibFrameThick = 5;
+
 unsigned char *g_pRGBBack;
-unsigned char *g_temp;
 int g_iBackWidth;
 int g_iBackHeight;
 int licznik_okna=0;
+
+
 
 unsigned char* ReadBmpFromFile(char* szFileName,int &riWidth, int &riHeight)
 {
@@ -186,7 +197,7 @@ unsigned char* ReadPpmFromFile(char* szFileName,int &riWidth, int &riHeight)
       {
         //16 bit samples - Nie wspierane
         /*
-        for(i=0;i<img->cmp[0]->dy;i++)
+        for(i=0;i<img->cmp[0]->dj;i++)
           for(j=0;j<img->cmp[0]->dx;j++)
           {
             x_fread(hfile,&buff,6);
@@ -217,13 +228,7 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 	  g_ostatnie[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
 	  g_ostatnie[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
 	  g_ostatnie[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
-
-      int R = pRGBDsrSample[(y*iWidth+x)*3+2];
-      int G = pRGBDsrSample[(y*iWidth+x)*3+1];
-      int B = pRGBDsrSample[(y*iWidth+x)*3+0];
-      float Y = 0.299f*R+0.587f*G+0.114f*B;
-      float U = -0.147f*R-0.289f*G+0.437f*B;
-      float V = 0.615f*R-0.515f*G+0.100f*B;
+	
 	}
   }
 
@@ -239,7 +244,7 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 					float Y = 0.299f*R+0.587f*G+0.114f*B;
 					float U = -0.147f*R-0.289f*G+0.437f*B;
 					float V = 0.615f*R-0.515f*G+0.100f*B;
-
+				
 					if((U<0)&&(V<0))
 					{
 					
@@ -255,12 +260,43 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 					g_ostatnie[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
 					g_ostatnie[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
 					}
+					
+					 if(g_bIsCalibrating)
+					 {
+							//Przetwarzaj œrodek ekranu
+							if((i>=g_iWidth/2-g_iCalibFrameSize)&&(i<=g_iWidth/2+g_iCalibFrameSize)&&(j>=g_iHeight/2-g_iCalibFrameSize)&&(j<=g_iHeight/2+g_iCalibFrameSize))
+							{
+							  //Rysuj ramkê na œrodku ekranu
+							  if(!((i>=g_iWidth/2-g_iCalibFrameSize+g_iCalibFrameThick)&&(i<=g_iWidth/2+g_iCalibFrameSize-g_iCalibFrameThick)&&(j>=g_iHeight/2-g_iCalibFrameSize+g_iCalibFrameThick)&&(j<=g_iHeight/2+g_iCalibFrameSize-g_iCalibFrameThick)))
+							  {
+								g_pRGBOriginalSample[(i*iWidth+j)*3+0] = 0;
+								g_pRGBOriginalSample[(i*iWidth+j)*3+1] = 0;
+								g_pRGBOriginalSample[(i*iWidth+j)*3+2] =255;
+							  }
+							  //Dodaj ramke do naszego histogramu
+							  if(g_bIsGetFrame)
+							  {
+								g_ppp3DHistogram[(unsigned char)Y][(unsigned char)U][(unsigned char)V] += 1;
+							  }
+							}
+						  }
+						  else
+						  {
+							if(g_ppp3DHistogram[(unsigned char)j][(unsigned char)U][(unsigned char)V]>1)
+							{
+								g_ostatnie[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
+								g_ostatnie[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
+								g_ostatnie[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
+							}
+		
+						}
 
-		}
+						}
+					 }
+	if(g_bIsGetFrame)
+      g_bIsGetFrame = false;
+ }
 
-	  }
-
-}
 
 int abs(int liczba)
 {
@@ -331,17 +367,51 @@ void xDisplayBmpOnWindow(HWND hWnd,int iX, int iY, unsigned char* pRGBSample, in
 
 LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+HWND hWndButton;  /////////////////////////
   switch (message)
   {
   case WM_CREATE:
-    xInitCamera(0,320,240); //Aktywacja pierwszej kamery do pobierania obrazu o rozdzielczoœci 320x240
+
+	hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Calibrate Mode"),BS_FLAT | WS_VISIBLE | WS_CHILD,660,40,120,30,hwnd,(HMENU)GRINBOX_CALIB_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
+    hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Detect Mode"),BS_FLAT | WS_VISIBLE | WS_CHILD,660,80,120,30,hwnd,(HMENU)GRINBOX_DETECT_BUTTON,GetModuleHandle(NULL),NULL);   ////////////
+    hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Get Frame"),BS_FLAT | WS_VISIBLE | WS_CHILD,660,120,120,30,hwnd,(HMENU)GRINBOX_GETFRAME_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
+	 
+
+    xInitCamera(0,320,240); //Aktjwacja pierwszej kamery do pobierania obrazu o rozdzielczoœci 320x240
+
 	g_pRGBOriginalSample = new unsigned char [320*240*3]; //Allokacja buffora pamieci na originalne próbki obrazu
     g_pRGBProcesedSample = new unsigned char [320*240*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
 	g_ostatnie = new unsigned char [320*240*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
 
 	g_pRGBBack = ReadPpmFromFile("blank.ppm",g_iBackWidth, g_iBackHeight); //Wczyt obrazu z pliku
 	
+
+
+
+    g_ppp3DHistogram = new unsigned int** [256]; //Allokacja buffora pamiêci na histogram obrazu
+    for(int i=0;i<256;i++)
+    {
+      g_ppp3DHistogram[i] = new unsigned int* [256];
+      for(int j=0;j<256;j++)
+      {
+        g_ppp3DHistogram[i][j] = new unsigned int [256];
+        for(int k=0;k<256;k++)
+        {
+          g_ppp3DHistogram[i][j][k] = 0;
+        }
+      }
+    }
+
+
+
+
+
+
     SetTimer(hwnd,GRINBOX_ID_TIMER_GET_FRAME,40,NULL); //Ustawienie minutnika na co 40 milisekund
+
+	 g_bIsCalibrating = false;
+    g_bIsGetFrame = false;
+
 
     break;
   case WM_PAINT:
@@ -354,9 +424,9 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case GRINBOX_ID_TIMER_GET_FRAME:
       xGetFrame(g_pRGBOriginalSample);  //Pobranie 1 ramki obrazu z kamery
+
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,320,240); //Wywo³anie procedury przetwarzaj¹cej obraz
       xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,320,240); //Wyœwitlenie 1 ramki obrazu na okienku
-     // xDisplayBmpOnWindow(hwnd,320,0,g_pRGBProcesedSample,320,240); //Wyœwitlenie tej samej ramki obrazu na okienku w innym miejscu
 	  xDisplayBmpOnWindow(hwnd,320,0,g_ostatnie,320,240); //Wyœwitlenie tej samej ramki obrazu na okienku w innym miejscu
       break;
     }
@@ -366,11 +436,22 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	  if(HIWORD(wParam)==0)
 		  switch(LOWORD(wParam))
 	  {
+
+			case GRINBOX_CALIB_BUTTON:
+				g_bIsCalibrating = true;
+				break;
+			case GRINBOX_DETECT_BUTTON:
+				//xEndCalibrate();
+				g_bIsCalibrating = false;
+				break;
+			case GRINBOX_GETFRAME_BUTTON:
+				g_bIsGetFrame = true;
+
 		  case ID_MENU_EXIT:
 			  PostQuitMessage(0);
 			  break;
 		  case ID_MENU_ABOUT:
-			  MessageBox(0,TEXT("Program napisany przez Kamila Czempiñskiego i Marcina No¿yñskiego w ramach ko³a multimedialnego \nWersja rozwojowa"),TEXT("O programie"),MB_OK);
+			  MessageBox(0,TEXT("Program napisany przez Kamila Czempiñskiego i Marcina No¿yñskiego w ramach ko³a multimedialnego \nWersja rozwojowa v0.83 Alpha"),TEXT("O programie"),MB_OK);
 			  break;
 		  case ID_MENU_LOADBACKGROUND:
 			  {
@@ -400,7 +481,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 					if(licznik_okna==0)
 					{
 					MessageBox(0,TEXT("Obraz t³a musi byæ formatu PPM lub BMP i mieæ rozdzielczoœæ 320x240 px"),TEXT("Obraz t³a"),MB_OK);
-					a++;
+					licznik_okna++;
 					}
 
 					if (GetOpenFileName(&ofn)==TRUE) 
@@ -420,7 +501,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 					g_pRGBBack = ReadBmpFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
 
 					if(!strstr(ofn.lpstrFile,".bmp")&&!strstr(ofn.lpstrFile,".ppm"))
-						MessageBox(0,TEXT("No to zdecyduj siê czy chcesz otworzyæ zanim bezsensownie klikasz plik->otwórz :D"),TEXT("WTF?"),MB_OK);
+						MessageBox(0,TEXT("No to zdecjduj siê czy chcesz otworzyæ zanim bezsensownie klikasz plik->otwórz :D"),TEXT("WTF?"),MB_OK);
 
 					
 
@@ -431,6 +512,25 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
   case WM_DESTROY:
     //DeleteObject(hBitmap);
+
+	  delete g_pRGBOriginalSample; //Deallokacja buffora pamieci na originalne próbki obrazu 
+    delete g_pRGBProcesedSample; //Deallokacja buffora pamieci na przetworzone próbki obrazu 
+    
+
+    //Deallokacja buffora pamiêci na histogram obrazu
+    for(int i=0;i<256;i++)
+    {
+      for(int j=0;j<256;j++)
+      {
+        delete g_ppp3DHistogram[i][j];
+      }
+      delete g_ppp3DHistogram[i];
+    }
+    delete g_ppp3DHistogram;
+
+
+
+
     PostQuitMessage(0);
     break;
   }
@@ -463,7 +563,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     WS_OVERLAPPEDWINDOW,
     0,
     0,
-	656,
+	1000,
     299,
     NULL,
     NULL,
