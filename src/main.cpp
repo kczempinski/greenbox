@@ -9,13 +9,13 @@ unsigned char *g_pRGBProcesedSample;
 unsigned char *g_ostatnie;
 
 
-unsigned int ***g_ppp3DHistogram;
+unsigned int ***g_wykrycieKoloru;
 bool g_bIsCalibrating;
 bool g_bIsGetFrame;
 
 int g_iWidth = 320;
 int g_iHeight = 240;
-int g_iCalibFrameSize =15;
+int g_iCalibFrameSize =25;
 int g_iCalibFrameThick = 5;
 
 unsigned char *g_pRGBBack;
@@ -224,11 +224,11 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
       pRGBDsrSample[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
       pRGBDsrSample[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
       pRGBDsrSample[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
-
+/*
 	  g_ostatnie[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
 	  g_ostatnie[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
 	  g_ostatnie[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
-	
+*/
 	}
   }
 
@@ -269,20 +269,20 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 							  //Rysuj ramkê na œrodku ekranu
 							  if(!((i>=g_iWidth/2-g_iCalibFrameSize+g_iCalibFrameThick)&&(i<=g_iWidth/2+g_iCalibFrameSize-g_iCalibFrameThick)&&(j>=g_iHeight/2-g_iCalibFrameSize+g_iCalibFrameThick)&&(j<=g_iHeight/2+g_iCalibFrameSize-g_iCalibFrameThick)))
 							  {
-								g_pRGBOriginalSample[(i*iWidth+j)*3+0] = 0;
-								g_pRGBOriginalSample[(i*iWidth+j)*3+1] = 0;
-								g_pRGBOriginalSample[(i*iWidth+j)*3+2] =255;
+								pRGBDsrSample[(i*iWidth+j)*3+0] = 0;
+								pRGBDsrSample[(i*iWidth+j)*3+1] = 0;
+								pRGBDsrSample[(i*iWidth+j)*3+2] =255;
 							  }
 							  //Dodaj ramke do naszego histogramu
 							  if(g_bIsGetFrame)
 							  {
-								g_ppp3DHistogram[(unsigned char)Y][(unsigned char)U][(unsigned char)V] += 1;
+								g_wykrycieKoloru[(unsigned char)Y][(unsigned char)U][(unsigned char)V] += 1;
 							  }
 							}
 						  }
 						  else
 						  {
-							if(g_ppp3DHistogram[(unsigned char)j][(unsigned char)U][(unsigned char)V]>1)
+							if(g_wykrycieKoloru[(unsigned char)j][(unsigned char)U][(unsigned char)V]>1)
 							{
 								g_ostatnie[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
 								g_ostatnie[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
@@ -293,22 +293,13 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 
 						}
 					 }
-	if(g_bIsGetFrame)
-      g_bIsGetFrame = false;
+	//if(g_bIsGetFrame)
+     // g_bIsGetFrame = false;
  }
 
 
-int abs(int liczba)
-{
-	if(liczba<0)
-		{
-			liczba=-liczba;
-			return liczba;
-	}
-	else
-		return liczba;
 
-}
+
 
 void xInitCamera(int iDevice, int iWidth, int iHeight)
 {
@@ -388,16 +379,16 @@ HWND hWndButton;  /////////////////////////
 
 
 
-    g_ppp3DHistogram = new unsigned int** [256]; //Allokacja buffora pamiêci na histogram obrazu
+    g_wykrycieKoloru = new unsigned int** [256]; //Allokacja buffora pamiêci na histogram obrazu
     for(int i=0;i<256;i++)
     {
-      g_ppp3DHistogram[i] = new unsigned int* [256];
+      g_wykrycieKoloru[i] = new unsigned int* [256];
       for(int j=0;j<256;j++)
       {
-        g_ppp3DHistogram[i][j] = new unsigned int [256];
+        g_wykrycieKoloru[i][j] = new unsigned int [256];
         for(int k=0;k<256;k++)
         {
-          g_ppp3DHistogram[i][j][k] = 0;
+          g_wykrycieKoloru[i][j][k] = 0;
         }
       }
     }
@@ -426,8 +417,8 @@ HWND hWndButton;  /////////////////////////
       xGetFrame(g_pRGBOriginalSample);  //Pobranie 1 ramki obrazu z kamery
 
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,320,240); //Wywo³anie procedury przetwarzaj¹cej obraz
-      xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,320,240); //Wyœwitlenie 1 ramki obrazu na okienku
-	  xDisplayBmpOnWindow(hwnd,320,0,g_ostatnie,320,240); //Wyœwitlenie tej samej ramki obrazu na okienku w innym miejscu
+      xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,320,240); //Wyœwitlenie 1 ramki obrazu na okienku
+	  xDisplayBmpOnWindow(hwnd,320,0,g_ostatnie,320,240); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
       break;
     }
     break;
@@ -522,11 +513,11 @@ HWND hWndButton;  /////////////////////////
     {
       for(int j=0;j<256;j++)
       {
-        delete g_ppp3DHistogram[i][j];
+        delete g_wykrycieKoloru[i][j];
       }
-      delete g_ppp3DHistogram[i];
+      delete g_wykrycieKoloru[i];
     }
-    delete g_ppp3DHistogram;
+    delete g_wykrycieKoloru;
 
 
 
