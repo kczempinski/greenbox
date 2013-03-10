@@ -6,10 +6,10 @@ HINSTANCE hInst;
 videoInput VI;
 unsigned char *g_pRGBOriginalSample;
 unsigned char *g_pRGBProcesedSample;
-unsigned char *g_ostatnie;
+unsigned char *g_last;
 
 
-unsigned int ***g_wykrycieKoloru;
+unsigned int ***g_colorDetection;
 bool g_bIsCalibrating;
 bool g_bIsGetFrame;
 
@@ -21,9 +21,6 @@ int g_iCalibFrameThick = 5;
 unsigned char *g_pRGBBack;
 int g_iBackWidth;
 int g_iBackHeight;
-int licznik_okna=0;
-
-
 
 unsigned char* ReadBmpFromFile(char* szFileName,int &riWidth, int &riHeight)
 {
@@ -225,9 +222,9 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
       pRGBDsrSample[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
       pRGBDsrSample[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
 /*
-	  g_ostatnie[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
-	  g_ostatnie[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
-	  g_ostatnie[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
+	  g_last[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
+	  g_last[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
+	  g_last[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
 */
 	}
   }
@@ -248,17 +245,17 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 					if((U<0)&&(V<0))
 					{
 					
-					g_ostatnie[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
-					g_ostatnie[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
-					g_ostatnie[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
+					g_last[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
+					g_last[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
+					g_last[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
 
 					}
 					else
 					{
 					
-					g_ostatnie[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
-					g_ostatnie[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
-					g_ostatnie[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
+					g_last[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
+					g_last[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
+					g_last[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
 					}
 					
 					 if(g_bIsCalibrating)
@@ -276,17 +273,17 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 							  //Dodaj ramke do naszego histogramu
 							  if(g_bIsGetFrame)
 							  {
-								g_wykrycieKoloru[(unsigned char)Y][(unsigned char)U][(unsigned char)V] += 1;
+								g_colorDetection[(unsigned char)Y][(unsigned char)U][(unsigned char)V] += 1;
 							  }
 							}
 						  }
 						  else
 						  {
-							if(g_wykrycieKoloru[(unsigned char)j][(unsigned char)U][(unsigned char)V]>1)
+							if(g_colorDetection[(unsigned char)j][(unsigned char)U][(unsigned char)V]>1)
 							{
-								g_ostatnie[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
-								g_ostatnie[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
-								g_ostatnie[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
+								g_last[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
+								g_last[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
+								g_last[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
 							}
 		
 						}
@@ -296,10 +293,6 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 	//if(g_bIsGetFrame)
      // g_bIsGetFrame = false;
  }
-
-
-
-
 
 void xInitCamera(int iDevice, int iWidth, int iHeight)
 {
@@ -372,37 +365,28 @@ HWND hWndButton;  /////////////////////////
 
 	g_pRGBOriginalSample = new unsigned char [320*240*3]; //Allokacja buffora pamieci na originalne próbki obrazu
     g_pRGBProcesedSample = new unsigned char [320*240*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
-	g_ostatnie = new unsigned char [320*240*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
+	g_last = new unsigned char [320*240*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
 
 	g_pRGBBack = ReadPpmFromFile("blank.ppm",g_iBackWidth, g_iBackHeight); //Wczyt obrazu z pliku
 	
-
-
-
-    g_wykrycieKoloru = new unsigned int** [256]; //Allokacja buffora pamiêci na histogram obrazu
+    g_colorDetection = new unsigned int** [256]; //Allokacja buffora pamiêci na histogram obrazu
     for(int i=0;i<256;i++)
     {
-      g_wykrycieKoloru[i] = new unsigned int* [256];
+      g_colorDetection[i] = new unsigned int* [256];
       for(int j=0;j<256;j++)
       {
-        g_wykrycieKoloru[i][j] = new unsigned int [256];
+        g_colorDetection[i][j] = new unsigned int [256];
         for(int k=0;k<256;k++)
         {
-          g_wykrycieKoloru[i][j][k] = 0;
+          g_colorDetection[i][j][k] = 0;
         }
       }
     }
-
-
-
-
-
 
     SetTimer(hwnd,GRINBOX_ID_TIMER_GET_FRAME,40,NULL); //Ustawienie minutnika na co 40 milisekund
 
 	 g_bIsCalibrating = false;
     g_bIsGetFrame = false;
-
 
     break;
   case WM_PAINT:
@@ -418,7 +402,7 @@ HWND hWndButton;  /////////////////////////
 
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,320,240); //Wywo³anie procedury przetwarzaj¹cej obraz
       xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,320,240); //Wyœwitlenie 1 ramki obrazu na okienku
-	  xDisplayBmpOnWindow(hwnd,320,0,g_ostatnie,320,240); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
+	  xDisplayBmpOnWindow(hwnd,320,0,g_last,320,240); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
       break;
     }
     break;
@@ -442,7 +426,7 @@ HWND hWndButton;  /////////////////////////
 			  PostQuitMessage(0);
 			  break;
 		  case ID_MENU_ABOUT:
-			  MessageBox(0,TEXT("Program napisany przez Kamila Czempiñskiego i Marcina No¿yñskiego w ramach ko³a multimedialnego \nWersja rozwojowa v0.83 Alpha"),TEXT("O programie"),MB_OK);
+			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\nunder Multimedia Scientific Circle\n\nversion pre pre pre pre pre alpha"),TEXT("O programie"),MB_OK);
 			  break;
 		  case ID_MENU_LOADBACKGROUND:
 			  {
@@ -459,7 +443,7 @@ HWND hWndButton;  /////////////////////////
 					// use the contents of szFile to initialize itself.
 					ofn.lpstrFile[0] = '\0';
 					ofn.nMaxFile = sizeof(szFile);
-					ofn.lpstrFilter = "PPM Files\0*.ppm\0BMP Files\0*.bmp\0";
+					ofn.lpstrFilter = " 320x240px PPM Files\0*.ppm\0 320x240px BMP Files\0*.bmp\0";
 					ofn.nFilterIndex = 1;
 					ofn.lpstrFileTitle = NULL;
 					ofn.nMaxFileTitle = 0;
@@ -467,13 +451,6 @@ HWND hWndButton;  /////////////////////////
 					ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 					// Display the Open dialog box. 
-
-					
-					if(licznik_okna==0)
-					{
-					MessageBox(0,TEXT("Obraz t³a musi byæ formatu PPM lub BMP i mieæ rozdzielczoœæ 320x240 px"),TEXT("Obraz t³a"),MB_OK);
-					licznik_okna++;
-					}
 
 					if (GetOpenFileName(&ofn)==TRUE) 
 						hf = CreateFile(ofn.lpstrFile, 
@@ -492,7 +469,7 @@ HWND hWndButton;  /////////////////////////
 					g_pRGBBack = ReadBmpFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
 
 					if(!strstr(ofn.lpstrFile,".bmp")&&!strstr(ofn.lpstrFile,".ppm"))
-						MessageBox(0,TEXT("No to zdecjduj siê czy chcesz otworzyæ zanim bezsensownie klikasz plik->otwórz :D"),TEXT("WTF?"),MB_OK);
+						MessageBox(0,TEXT("Why ya clickin if not openin, dude?"),TEXT("WTF?"),MB_OK);
 
 					
 
@@ -513,11 +490,11 @@ HWND hWndButton;  /////////////////////////
     {
       for(int j=0;j<256;j++)
       {
-        delete g_wykrycieKoloru[i][j];
+        delete g_colorDetection[i][j];
       }
-      delete g_wykrycieKoloru[i];
+      delete g_colorDetection[i];
     }
-    delete g_wykrycieKoloru;
+    delete g_colorDetection;
 
 
 
