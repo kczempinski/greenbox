@@ -351,8 +351,8 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 
 						}
 					 }
-	//if(g_bIsGetFrame)
-     // g_bIsGetFrame = false;
+	if(g_bIsGetFrame)
+    g_bIsGetFrame = false;
  }
 
 void xInitCamera(int iDevice, int iWidth, int iHeight)
