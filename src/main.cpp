@@ -7,6 +7,7 @@ videoInput VI;
 unsigned char *g_pRGBOriginalSample;
 unsigned char *g_pRGBProcesedSample;
 unsigned char *g_last;
+unsigned char *g_temp;
 
 
 unsigned int ***g_colorDetection;
@@ -266,6 +267,7 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
       pRGBDsrSample[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
       pRGBDsrSample[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
       pRGBDsrSample[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
+	  //g_temp=pRGBDsrSample;
 /*
 	  g_last[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
 	  g_last[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
@@ -279,9 +281,16 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 		for(int j=0; j<iWidth;j++)
 		{
 		
-					int R = pRGBDsrSample[(i*iWidth+j)*3+2];
-					int G = pRGBDsrSample[(i*iWidth+j)*3+1];
-					int B = pRGBDsrSample[(i*iWidth+j)*3+0];
+					if(!(i==0||j==0||i==iWidth||j==iHeight))
+					{
+						g_temp[(i*iWidth+j)*3+0] = (pRGBDsrSample[(i*iWidth+j)*3+0]+pRGBDsrSample[((i-1)*iWidth+j)*3+0]+pRGBDsrSample[((i+1)*iWidth+j)*3+0]+pRGBDsrSample[(i*iWidth+(j+1))*3+0]+pRGBDsrSample[(i*iWidth+(j-1))*3+0])/5;
+						g_temp[(i*iWidth+j)*3+1] = (pRGBDsrSample[(i*iWidth+j)*3+1]+pRGBDsrSample[((i-1)*iWidth+j)*3+1]+pRGBDsrSample[((i+1)*iWidth+j)*3+1]+pRGBDsrSample[(i*iWidth+(j+1))*3+1]+pRGBDsrSample[(i*iWidth+(j-1))*3+1])/5;
+						g_temp[(i*iWidth+j)*3+2] = (pRGBDsrSample[(i*iWidth+j)*3+2]+pRGBDsrSample[((i-1)*iWidth+j)*3+2]+pRGBDsrSample[((i+1)*iWidth+j)*3+2]+pRGBDsrSample[(i*iWidth+(j+1))*3+2]+pRGBDsrSample[(i*iWidth+(j-1))*3+2])/5;
+					}
+
+					int R = g_temp[(i*iWidth+j)*3+2];
+					int G = g_temp[(i*iWidth+j)*3+1];
+					int B = g_temp[(i*iWidth+j)*3+0];
 					
 					float Y = 0.299f*R+0.587f*G+0.114f*B;
 					float U = -0.147f*R-0.289f*G+0.437f*B;
@@ -307,6 +316,7 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 					g_last[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
 					g_last[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
 					g_last[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
+
 					
 					
 					 if(g_bIsCalibrating)
@@ -417,7 +427,7 @@ HWND hWndButton;  /////////////////////////
 	g_pRGBOriginalSample = new unsigned char [g_iWidth*g_iHeight*3]; //Allokacja buffora pamieci na originalne próbki obrazu
     g_pRGBProcesedSample = new unsigned char [g_iWidth*g_iHeight*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
 	g_last = new unsigned char [g_iWidth*g_iHeight*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
-
+	g_temp = new unsigned char [g_iWidth*g_iHeight*3]; //Allokacja buffora pamieci na przetworzone próbki obrazu
 	g_pRGBBack = ReadPpmFromFile("blank.ppm",g_iBackWidth, g_iBackHeight); //Wczyt obrazu z pliku
 	
     g_colorDetection = new unsigned int** [256]; //Allokacja buffora pamiêci na histogram obrazu
