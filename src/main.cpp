@@ -14,10 +14,10 @@ unsigned int ***g_colorDetection;
 bool g_bIsCalibrating;
 bool g_bIsGetFrame;
 
-int g_iWidth = 640;
-int g_iHeight = 480;
+int g_iWidth = 320;
+int g_iHeight = 240;
 int g_iCalibFrameSize =25;
-int g_iCalibFrameThick = 5;
+int g_iCalibFrameThick = 3;
 
 unsigned char *g_pRGBBack;
 int g_iBackWidth;
@@ -68,6 +68,8 @@ void xEndCalibrate()
   delete ppHist;
 
 }
+
+
 unsigned char* ReadBmpFromFile(char* szFileName,int &riWidth, int &riHeight)
 {
 	BITMAPFILEHEADER     bfh;
@@ -258,6 +260,32 @@ unsigned char* ReadPpmFromFile(char* szFileName,int &riWidth, int &riHeight)
  return NULL;
 }
 
+void ResetHistogram(int iHeight, int iWidth)
+{
+	for(double Y=0; Y<255;Y++)
+	  {
+		for(int U=0; U<256;U++)
+			{
+				for(int V=0; V<256;V++)
+				{
+					/*
+					int R = g_pRGBOriginalSample[(i*iWidth+j)*3+2];
+					int G = g_pRGBOriginalSample[(i*iWidth+j)*3+1];
+					int B = g_pRGBOriginalSample[(i*iWidth+j)*3+0];
+					
+					float Y = 0.299f*R+0.587f*G+0.114f*B;
+					float U = -0.147f*R-0.289f*G+0.437f*B;
+					float V = 0.615f*R-0.515f*G+0.100f*B;  */
+
+					
+					g_colorDetection[(unsigned char)Y][(unsigned char)U][(unsigned char)V] = 0;
+				}
+			}
+		}
+}
+
+
+
 void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSample,int iWidth, int iHeight)
 {
   for(int y=0;y<iHeight;y++) //Pêtla po wszystkich wierszach obrazu
@@ -280,7 +308,7 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 	  {
 		for(int j=0; j<iWidth;j++)
 		{
-		
+					// maska usuwaj¹ca szumy
 					if(!(i==0||j==0||i==iWidth||j==iHeight))
 					{
 						g_temp[(i*iWidth+j)*3+0] = (pRGBDsrSample[(i*iWidth+j)*3+0]+pRGBDsrSample[((i-1)*iWidth+j)*3+0]+pRGBDsrSample[((i+1)*iWidth+j)*3+0]+pRGBDsrSample[(i*iWidth+(j+1))*3+0]+pRGBDsrSample[(i*iWidth+(j-1))*3+0])/5;
@@ -295,7 +323,9 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 					float Y = 0.299f*R+0.587f*G+0.114f*B;
 					float U = -0.147f*R-0.289f*G+0.437f*B;
 					float V = 0.615f*R-0.515f*G+0.100f*B;
-				/*
+
+
+				   /*
 					if((U<0)&&(V<0))
 					{
 					
@@ -310,13 +340,15 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 					g_last[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
 					g_last[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
 					g_last[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
-					} */
+					} 
+					
+				  */
 
-
+					
 					g_last[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
 					g_last[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
 					g_last[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
-
+					
 					
 					
 					 if(g_bIsCalibrating)
@@ -354,6 +386,8 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 	if(g_bIsGetFrame)
     g_bIsGetFrame = false;
  }
+
+
 
 void xInitCamera(int iDevice, int iWidth, int iHeight)
 {
@@ -420,6 +454,7 @@ HWND hWndButton;  /////////////////////////
 	hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Calibrate Mode"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth*2+20,40,120,30,hwnd,(HMENU)GRINBOX_CALIB_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
     hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Detect Mode"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth*2+20,80,120,30,hwnd,(HMENU)GRINBOX_DETECT_BUTTON,GetModuleHandle(NULL),NULL);   ////////////
     hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Get Frame"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth*2+20,120,120,30,hwnd,(HMENU)GRINBOX_GETFRAME_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
+	hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Reset Calibration"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth*2+20,160,120,30,hwnd,(HMENU)GRINBOX_RESET_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
 	 
 
     xInitCamera(0,g_iWidth,g_iHeight); //Aktjwacja pierwszej kamery do pobierania obrazu o rozdzielczoœci 320x240
@@ -483,12 +518,15 @@ HWND hWndButton;  /////////////////////////
 			case GRINBOX_GETFRAME_BUTTON:
 				g_bIsGetFrame = true;
 				break;
+			case GRINBOX_RESET_BUTTON:
+				ResetHistogram(240,320);
+				break;
 
 		  case ID_MENU_EXIT:
 			  PostQuitMessage(0);
 			  break;
 		  case ID_MENU_ABOUT:
-			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\nunder Multimedia Scientific Circle\n\nversion pre pre pre pre pre alpha"),TEXT("About"),MB_OK);
+			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\nunder Multimedia Scientific Circle\n\nversion 0.84.02 alpha"),TEXT("About"),MB_OK);
 			  break;
 		  case ID_MENU_LOADBACKGROUND:
 			  {
@@ -596,8 +634,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     WS_OVERLAPPEDWINDOW,
     0,
     0,
-	g_iWidth*2+300,
-    g_iHeight,
+	g_iWidth*2+180,
+    g_iHeight+60,
     NULL,
     NULL,
     hInstance,
