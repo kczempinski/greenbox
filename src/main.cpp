@@ -16,7 +16,7 @@ bool g_bIsGetFrame;
 
 int g_iWidth = 320;
 int g_iHeight = 240;
-int g_iCalibFrameSize =25;
+int g_iCalibFrameSize =15;
 int g_iCalibFrameThick = 3;
 
 unsigned char *g_pRGBBack;
@@ -266,20 +266,8 @@ void ResetHistogram(int iHeight, int iWidth)
 	  {
 		for(int U=0; U<256;U++)
 			{
-				for(int V=0; V<256;V++)
-				{
-					/*
-					int R = g_pRGBOriginalSample[(i*iWidth+j)*3+2];
-					int G = g_pRGBOriginalSample[(i*iWidth+j)*3+1];
-					int B = g_pRGBOriginalSample[(i*iWidth+j)*3+0];
-					
-					float Y = 0.299f*R+0.587f*G+0.114f*B;
-					float U = -0.147f*R-0.289f*G+0.437f*B;
-					float V = 0.615f*R-0.515f*G+0.100f*B;  */
-
-					
+				for(int V=0; V<256;V++)					
 					g_colorDetection[(unsigned char)Y][(unsigned char)U][(unsigned char)V] = 0;
-				}
 			}
 		}
 }
@@ -308,23 +296,54 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 	  {
 		for(int j=0; j<iWidth;j++)
 		{
-					// maska usuwaj¹ca szumy
-					if(!(i==0||j==0||i==iWidth||j==iHeight))
+
+			g_temp[(i*iWidth+j)*3+0]= pRGBDsrSample[(i*iWidth+j)*3+0];
+			g_temp[(i*iWidth+j)*3+1]= pRGBDsrSample[(i*iWidth+j)*3+1];
+			g_temp[(i*iWidth+j)*3+2]= pRGBDsrSample[(i*iWidth+j)*3+2];
+
+				
+			// maska usuwaj¹ca szumy
+
+					bool MaskOnOff=TRUE;
+				//	bool MaskOnOff=FALSE;
+
+					if( MaskOnOff==TRUE)
 					{
-						g_temp[(i*iWidth+j)*3+0] = (pRGBDsrSample[(i*iWidth+j)*3+0]+pRGBDsrSample[((i-1)*iWidth+j)*3+0]+pRGBDsrSample[((i+1)*iWidth+j)*3+0]+pRGBDsrSample[(i*iWidth+(j+1))*3+0]+pRGBDsrSample[(i*iWidth+(j-1))*3+0])/5;
-						g_temp[(i*iWidth+j)*3+1] = (pRGBDsrSample[(i*iWidth+j)*3+1]+pRGBDsrSample[((i-1)*iWidth+j)*3+1]+pRGBDsrSample[((i+1)*iWidth+j)*3+1]+pRGBDsrSample[(i*iWidth+(j+1))*3+1]+pRGBDsrSample[(i*iWidth+(j-1))*3+1])/5;
-						g_temp[(i*iWidth+j)*3+2] = (pRGBDsrSample[(i*iWidth+j)*3+2]+pRGBDsrSample[((i-1)*iWidth+j)*3+2]+pRGBDsrSample[((i+1)*iWidth+j)*3+2]+pRGBDsrSample[(i*iWidth+(j+1))*3+2]+pRGBDsrSample[(i*iWidth+(j-1))*3+2])/5;
-					}
+						int MaskSize=1;  // 3x3, 5x5 itp
+						int tempMaskSize= MaskSize;
+						MaskSize=(MaskSize-1)/2; 
 
-					int R = g_temp[(i*iWidth+j)*3+2];
-					int G = g_temp[(i*iWidth+j)*3+1];
-					int B = g_temp[(i*iWidth+j)*3+0];
+						if(   j>MaskSize   &&   j<(iWidth-MaskSize )   &&  i>MaskSize     &&     i<(iHeight-MaskSize)     )
+						{
+													
+								for(int x=-MaskSize ;x<=MaskSize ;x++)
+								{
+									for(int y=-MaskSize ;y<=MaskSize ;y++)
+									{
+											if(y!=0 && x!=0)
+											{
+													g_temp[(i*iWidth+j)*3+0] = g_temp[(i*iWidth+j)*3+0] + pRGBDsrSample[((i+x)*iWidth+(j+y))*3+0];
+													g_temp[(i*iWidth+j)*3+1] = g_temp[(i*iWidth+j)*3+1] + pRGBDsrSample[((i+x)*iWidth+(j+y))*3+1];
+													g_temp[(i*iWidth+j)*3+2] = g_temp[(i*iWidth+j)*3+2] + pRGBDsrSample[((i+x)*iWidth+(j+y))*3+2];
+											}
+									}
+								}
 					
-					float Y = 0.299f*R+0.587f*G+0.114f*B;
-					float U = -0.147f*R-0.289f*G+0.437f*B;
-					float V = 0.615f*R-0.515f*G+0.100f*B;
+							g_temp[(i*iWidth+j)*3+0] /=(tempMaskSize*tempMaskSize); 
+							g_temp[(i*iWidth+j)*3+1] /=(tempMaskSize*tempMaskSize);
+							g_temp[(i*iWidth+j)*3+2] /=(tempMaskSize*tempMaskSize);
 
+							}
+					}
+					
 
+							int R = g_temp[(i*iWidth+j)*3+2];
+							int G = g_temp[(i*iWidth+j)*3+1];
+							int B = g_temp[(i*iWidth+j)*3+0];
+
+							float Y = 0.299f*R+0.587f*G+0.114f*B;
+							float U = -0.147f*R-0.289f*G+0.437f*B;
+							float V = 0.615f*R-0.515f*G+0.100f*B;
 				   /*
 					if((U<0)&&(V<0))
 					{
@@ -347,7 +366,7 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 					
 					g_last[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
 					g_last[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
-					g_last[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
+					g_last[(i*iWidth+j)*3+2] = pRGBDsrSample[(i*iWidth+j)*3+2];
 					
 					
 					
@@ -359,9 +378,9 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 							  //Rysuj ramkê na œrodku ekranu
 							  if(!((i>=g_iWidth/2-g_iCalibFrameSize+g_iCalibFrameThick)&&(i<=g_iWidth/2+g_iCalibFrameSize-g_iCalibFrameThick)&&(j>=g_iHeight/2-g_iCalibFrameSize+g_iCalibFrameThick)&&(j<=g_iHeight/2+g_iCalibFrameSize-g_iCalibFrameThick)))
 							  {
-								pRGBDsrSample[(i*iWidth+j)*3+0] = 0;
-								pRGBDsrSample[(i*iWidth+j)*3+1] = 0;
-								pRGBDsrSample[(i*iWidth+j)*3+2] =255;
+								g_last[(i*iWidth+j)*3+0] = 0;
+								g_last[(i*iWidth+j)*3+1] = 0;
+								g_last[(i*iWidth+j)*3+2] =255;
 							  }
 							  //Dodaj ramke do naszego histogramu
 							  if(g_bIsGetFrame)
@@ -451,10 +470,10 @@ HWND hWndButton;  /////////////////////////
   {
   case WM_CREATE:
 
-	hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Calibrate Mode"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth*2+20,40,120,30,hwnd,(HMENU)GRINBOX_CALIB_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
-    hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Detect Mode"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth*2+20,80,120,30,hwnd,(HMENU)GRINBOX_DETECT_BUTTON,GetModuleHandle(NULL),NULL);   ////////////
-    hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Get Frame"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth*2+20,120,120,30,hwnd,(HMENU)GRINBOX_GETFRAME_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
-	hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Reset Calibration"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth*2+20,160,120,30,hwnd,(HMENU)GRINBOX_RESET_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
+	hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Calibrate Mode"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth+20,40,120,30,hwnd,(HMENU)GRINBOX_CALIB_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
+    hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Detect Mode"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth+20,80,120,30,hwnd,(HMENU)GRINBOX_DETECT_BUTTON,GetModuleHandle(NULL),NULL);   ////////////
+    hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Get Frame"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth+20,120,120,30,hwnd,(HMENU)GRINBOX_GETFRAME_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
+	hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Reset Calibration"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth+20,160,120,30,hwnd,(HMENU)GRINBOX_RESET_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
 	 
 
     xInitCamera(0,g_iWidth,g_iHeight); //Aktjwacja pierwszej kamery do pobierania obrazu o rozdzielczoœci 320x240
@@ -486,8 +505,8 @@ HWND hWndButton;  /////////////////////////
 
     break;
   case WM_PAINT:
-    xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,g_iWidth,g_iHeight); //Narysowanie naszego buffora próbek obrazu na okienku
-    xDisplayBmpOnWindow(hwnd,320,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Narysowanie naszego buffora próbek obrazu na okienku
+  //  xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,g_iWidth,g_iHeight); //Narysowanie naszego buffora próbek obrazu na okienku
+    xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Narysowanie naszego buffora próbek obrazu na okienku
       break;
     break;
   case WM_TIMER:
@@ -497,8 +516,8 @@ HWND hWndButton;  /////////////////////////
       xGetFrame(g_pRGBOriginalSample);  //Pobranie 1 ramki obrazu z kamery
 
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wywo³anie procedury przetwarzaj¹cej obraz
-      xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wyœwitlenie 1 ramki obrazu na okienku
-	  xDisplayBmpOnWindow(hwnd,g_iWidth,0,g_last,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
+    //  xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wyœwitlenie 1 ramki obrazu na okienku
+	  xDisplayBmpOnWindow(hwnd,0,0,g_last,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
       break;
     }
     break;
@@ -634,7 +653,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     WS_OVERLAPPEDWINDOW,
     0,
     0,
-	g_iWidth*2+180,
+	g_iWidth+180,
     g_iHeight+60,
     NULL,
     NULL,
