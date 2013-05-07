@@ -14,14 +14,18 @@ unsigned int ***g_colorDetection;
 bool g_bIsCalibrating;
 bool g_bIsGetFrame;
 
-int g_iWidth = 320;
-int g_iHeight = 240;
+int g_iWidth = 640;
+int g_iHeight = 480;
 int g_iCalibFrameSize =15;
 int g_iCalibFrameThick = 3;
 
 unsigned char *g_pRGBBack;
 int g_iBackWidth;
 int g_iBackHeight;
+
+bool combined=true;
+bool back;
+bool cam;
 
 void xEndCalibrate()
 {
@@ -272,8 +276,6 @@ void ResetHistogram(int iHeight, int iWidth)
 		}
 }
 
-
-
 void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSample,int iWidth, int iHeight)
 {
   for(int y=0;y<iHeight;y++) //Pêtla po wszystkich wierszach obrazu
@@ -406,8 +408,6 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
     g_bIsGetFrame = false;
  }
 
-
-
 void xInitCamera(int iDevice, int iWidth, int iHeight)
 {
   int width,height,size;
@@ -465,7 +465,7 @@ void xDisplayBmpOnWindow(HWND hWnd,int iX, int iY, unsigned char* pRGBSample, in
 
 LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-HWND hWndButton;  /////////////////////////
+HWND hWndButton;
   switch (message)
   {
   case WM_CREATE:
@@ -517,7 +517,9 @@ HWND hWndButton;  /////////////////////////
 
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wywo³anie procedury przetwarzaj¹cej obraz
     //  xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wyœwitlenie 1 ramki obrazu na okienku
-	  xDisplayBmpOnWindow(hwnd,0,0,g_last,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
+	  if (combined) xDisplayBmpOnWindow(hwnd,0,0,g_last,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
+	  if (back)xDisplayBmpOnWindow(hwnd,0,0,g_pRGBBack,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
+	  if (cam) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
       break;
     }
     break;
@@ -540,7 +542,27 @@ HWND hWndButton;  /////////////////////////
 			case GRINBOX_RESET_BUTTON:
 				ResetHistogram(240,320);
 				break;
-
+			case ID_BACK:
+				back=true;
+				cam=combined=false;
+				CheckMenuItem(GetMenu(hwnd),ID_BACK,MF_CHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_UNCHECKED);
+				break;
+			case ID_CAM:
+				cam=true;
+				combined=back=false;
+				CheckMenuItem(GetMenu(hwnd),ID_BACK,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_CHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_UNCHECKED);
+				break;
+			case ID_COMB:
+				CheckMenuItem(GetMenu(hwnd),ID_BACK,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_CHECKED);
+				combined=true;
+				cam=back=false;
+				break;
 		  case ID_MENU_EXIT:
 			  PostQuitMessage(0);
 			  break;

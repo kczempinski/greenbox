@@ -15,10 +15,6 @@
 
 #define GRINBOX_ID_TIMER_GET_FRAME 501
 
-
-
-
-
 #define GRINBOX_APP_CLASS_NAME TEXT("GrinboxAppClass")
 
 #define GRINBOX_APP_WINDOW_NAME TEXT("GrinboxAppWindow")
@@ -28,5 +24,8 @@
 #define ID_MENU_EXIT 103
 #define ID_MENU_ABOUT 104
 #define ID_MENU_LOADBACKGROUND 105
+#define ID_BACK 106
+#define ID_CAM 107
+#define ID_COMB 108
 
 #endif
