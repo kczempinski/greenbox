@@ -26,6 +26,10 @@ int g_iBackHeight;
 bool combined=true;
 bool back;
 bool cam;
+bool filtered;
+
+int maskSize=0;
+int mask=1;
 
 void xEndCalibrate()
 {
@@ -72,7 +76,6 @@ void xEndCalibrate()
   delete ppHist;
 
 }
-
 
 unsigned char* ReadBmpFromFile(char* szFileName,int &riWidth, int &riHeight)
 {
@@ -303,42 +306,26 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 			g_temp[(i*iWidth+j)*3+1]= pRGBDsrSample[(i*iWidth+j)*3+1];
 			g_temp[(i*iWidth+j)*3+2]= pRGBDsrSample[(i*iWidth+j)*3+2];
 
-				
-			// maska usuwaj¹ca szumy
-
-					bool MaskOnOff=TRUE;
-				//	bool MaskOnOff=FALSE;
-
-					if( MaskOnOff==TRUE)
+			//mask
+			if(maskSize && i>maskSize && j>maskSize && j<iWidth-maskSize && i<iHeight-maskSize)
+			{
+				g_temp[(i*iWidth+j)*3+0]=g_temp[(i*iWidth+j)*3+0]/mask;
+				g_temp[(i*iWidth+j)*3+1]=g_temp[(i*iWidth+j)*3+1]/mask;
+				g_temp[(i*iWidth+j)*3+2]=g_temp[(i*iWidth+j)*3+2]/mask;
+				for (int ii=-maskSize;ii<=maskSize;ii++)
+				{
+					for (int jj=-maskSize;jj<=maskSize;jj++)
 					{
-						int MaskSize=1;  // 3x3, 5x5 itp
-						int tempMaskSize= MaskSize;
-						MaskSize=(MaskSize-1)/2; 
-
-						if(   j>MaskSize   &&   j<(iWidth-MaskSize )   &&  i>MaskSize     &&     i<(iHeight-MaskSize)     )
+						if (ii || jj)
 						{
-													
-								for(int x=-MaskSize ;x<=MaskSize ;x++)
-								{
-									for(int y=-MaskSize ;y<=MaskSize ;y++)
-									{
-											if(y!=0 && x!=0)
-											{
-													g_temp[(i*iWidth+j)*3+0] = g_temp[(i*iWidth+j)*3+0] + pRGBDsrSample[((i+x)*iWidth+(j+y))*3+0];
-													g_temp[(i*iWidth+j)*3+1] = g_temp[(i*iWidth+j)*3+1] + pRGBDsrSample[((i+x)*iWidth+(j+y))*3+1];
-													g_temp[(i*iWidth+j)*3+2] = g_temp[(i*iWidth+j)*3+2] + pRGBDsrSample[((i+x)*iWidth+(j+y))*3+2];
-											}
-									}
-								}
-					
-							g_temp[(i*iWidth+j)*3+0] /=(tempMaskSize*tempMaskSize); 
-							g_temp[(i*iWidth+j)*3+1] /=(tempMaskSize*tempMaskSize);
-							g_temp[(i*iWidth+j)*3+2] /=(tempMaskSize*tempMaskSize);
-
-							}
+						g_temp[(i*iWidth+j)*3+0]=g_temp[(i*iWidth+j)*3+0]+pRGBDsrSample[((i+ii)*iWidth+(j+jj))*3+0]/mask;
+						g_temp[(i*iWidth+j)*3+1]=g_temp[(i*iWidth+j)*3+1]+pRGBDsrSample[((i+ii)*iWidth+(j+jj))*3+1]/mask;
+						g_temp[(i*iWidth+j)*3+2]=g_temp[(i*iWidth+j)*3+2]+pRGBDsrSample[((i+ii)*iWidth+(j+jj))*3+2]/mask;
+						}
 					}
-					
+				}
 
+			}
 							int R = g_temp[(i*iWidth+j)*3+2];
 							int G = g_temp[(i*iWidth+j)*3+1];
 							int B = g_temp[(i*iWidth+j)*3+0];
@@ -520,6 +507,7 @@ HWND hWndButton;
 	  if (combined) xDisplayBmpOnWindow(hwnd,0,0,g_last,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
 	  if (back)xDisplayBmpOnWindow(hwnd,0,0,g_pRGBBack,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
 	  if (cam) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
+	  if (filtered) xDisplayBmpOnWindow(hwnd,0,0,g_temp,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
       break;
     }
     break;
@@ -544,24 +532,56 @@ HWND hWndButton;
 				break;
 			case ID_BACK:
 				back=true;
-				cam=combined=false;
+				filtered=cam=combined=false;
 				CheckMenuItem(GetMenu(hwnd),ID_BACK,MF_CHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_FILTERED,MF_UNCHECKED);
 				break;
 			case ID_CAM:
 				cam=true;
-				combined=back=false;
+				filtered=combined=back=false;
 				CheckMenuItem(GetMenu(hwnd),ID_BACK,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_CHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_FILTERED,MF_UNCHECKED);
 				break;
 			case ID_COMB:
 				CheckMenuItem(GetMenu(hwnd),ID_BACK,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_CHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_FILTERED,MF_UNCHECKED);
 				combined=true;
-				cam=back=false;
+				filtered=cam=back=false;
+				break;
+			case ID_FILTERED:
+				CheckMenuItem(GetMenu(hwnd),ID_BACK,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_FILTERED,MF_CHECKED);
+				filtered=true;
+				combined=cam=back=false;
+				break;
+			case ID_MASK_OFF:
+				maskSize=0;
+				mask=((1+2*maskSize)*(1+2*maskSize));
+				CheckMenuItem(GetMenu(hwnd),ID_MASK_OFF,MF_CHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_MASK_3,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_MASK_5,MF_UNCHECKED);
+				break;
+			case ID_MASK_3:
+				maskSize=1;
+				mask=((1+2*maskSize)*(1+2*maskSize));
+				CheckMenuItem(GetMenu(hwnd),ID_MASK_OFF,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_MASK_3,MF_CHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_MASK_5,MF_UNCHECKED);
+				break;
+			case ID_MASK_5:
+				maskSize=2;
+				mask=((1+2*maskSize)*(1+2*maskSize));
+				CheckMenuItem(GetMenu(hwnd),ID_MASK_OFF,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_MASK_3,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_MASK_5,MF_CHECKED);
 				break;
 		  case ID_MENU_EXIT:
 			  PostQuitMessage(0);

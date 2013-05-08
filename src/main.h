@@ -27,5 +27,10 @@
 #define ID_BACK 106
 #define ID_CAM 107
 #define ID_COMB 108
+#define ID_FILTERED 666
+
+#define ID_MASK_OFF 109
+#define ID_MASK_3 110
+#define ID_MASK_5 111
 
 #endif
