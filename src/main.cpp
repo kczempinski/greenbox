@@ -16,7 +16,7 @@ bool g_bIsGetFrame;
 
 int g_iWidth = 640;
 int g_iHeight = 480;
-int g_iCalibFrameSize =15;
+int g_iCalibFrameSize =150;
 int g_iCalibFrameThick = 3;
 
 unsigned char *g_pRGBBack;
@@ -28,7 +28,7 @@ bool back;
 bool cam;
 bool filtered;
 
-int maskSize=0;
+int maskSize=0;		
 int mask=1;
 
 void xEndCalibrate()
@@ -519,6 +519,12 @@ HWND hWndButton;
 
 			case GRINBOX_CALIB_BUTTON:
 				g_bIsCalibrating = true;
+				CheckMenuItem(GetMenu(hwnd),ID_BACK,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_CHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_FILTERED,MF_UNCHECKED);
+				combined=true;
+				filtered=cam=back=false;
 				break;
 			case GRINBOX_DETECT_BUTTON:
 				xEndCalibrate();
@@ -528,7 +534,7 @@ HWND hWndButton;
 				g_bIsGetFrame = true;
 				break;
 			case GRINBOX_RESET_BUTTON:
-				ResetHistogram(240,320);
+				ResetHistogram(480,640);
 				break;
 			case ID_BACK:
 				back=true;
@@ -587,7 +593,7 @@ HWND hWndButton;
 			  PostQuitMessage(0);
 			  break;
 		  case ID_MENU_ABOUT:
-			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\nunder Multimedia Scientific Circle\n\nversion 0.84.02 alpha"),TEXT("About"),MB_OK);
+			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\nunder Multimedia Scientific Circle\n\nversion 0.88.1 beta"),TEXT("About"),MB_OK);
 			  break;
 		  case ID_MENU_LOADBACKGROUND:
 			  {
@@ -604,7 +610,7 @@ HWND hWndButton;
 					// use the contents of szFile to initialize itself.
 					ofn.lpstrFile[0] = '\0';
 					ofn.nMaxFile = sizeof(szFile);
-					ofn.lpstrFilter = " 320x240px PPM Files\0*.ppm\0 320x240px BMP Files\0*.bmp\0";
+					ofn.lpstrFilter = "PPM Files\0*.ppm\0BMP Files\0*.bmp\0";
 					ofn.nFilterIndex = 1;
 					ofn.lpstrFileTitle = NULL;
 					ofn.nMaxFileTitle = 0;
