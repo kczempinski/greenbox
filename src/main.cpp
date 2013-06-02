@@ -1,6 +1,14 @@
 #include "main.h"
 #include <videoInput.h>
 
+#include <gl\GL.h>
+#include <gl\GLU.h>
+//#include <gl\glaux.h>
+
+#pragma comment( lib, "opengl32.lib" )
+#pragma comment( lib, "glu32.lib" )
+//#pragma comment( lib, "glaux.lib" )
+
 HINSTANCE hInst;
 
 videoInput VI;
@@ -438,7 +446,6 @@ void xDisplayBmpOnWindow(HWND hWnd,int iX, int iY, unsigned char* pRGBSample, in
   biBmpInfoHeader.biYPelsPerMeter = 0;
   biBmpInfoHeader.biClrUsed = 0;
   biBmpInfoHeader.biClrImportant = 0;
-
   SetDIBits(hDCofBmp,hBmp,0,iWidth*iHeight,pRGBSample,(BITMAPINFO*)&biBmpInfoHeader,DIB_RGB_COLORS);
 
   BitBlt(hDC,iX,iY,iWidth,iHeight,hDCofBmp,0,0,SRCCOPY);
@@ -448,6 +455,21 @@ void xDisplayBmpOnWindow(HWND hWnd,int iX, int iY, unsigned char* pRGBSample, in
   DeleteDC(hDCofBmp);
 
   ReleaseDC(hWnd,hDC);
+}
+
+GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
+{
+	if(height==0)
+	{
+		height=1;
+	}
+
+	glViewport(0,0,width,height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,1000.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -462,7 +484,6 @@ HWND hWndButton;
     hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Get Frame"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth+20,120,120,30,hwnd,(HMENU)GRINBOX_GETFRAME_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
 	hWndButton = CreateWindow(TEXT("BUTTON"),TEXT("Reset Calibration"),BS_FLAT | WS_VISIBLE | WS_CHILD,g_iWidth+20,160,120,30,hwnd,(HMENU)GRINBOX_RESET_BUTTON,GetModuleHandle(NULL),NULL);  ///////////
 	 
-
     xInitCamera(0,g_iWidth,g_iHeight); //Aktjwacja pierwszej kamery do pobierania obrazu o rozdzielczoœci 320x240
 
 	g_pRGBOriginalSample = new unsigned char [g_iWidth*g_iHeight*3]; //Allokacja buffora pamieci na originalne próbki obrazu
@@ -516,7 +537,6 @@ HWND hWndButton;
 	  if(HIWORD(wParam)==0)
 		  switch(LOWORD(wParam))
 	  {
-
 			case GRINBOX_CALIB_BUTTON:
 				g_bIsCalibrating = true;
 				CheckMenuItem(GetMenu(hwnd),ID_BACK,MF_UNCHECKED);
@@ -589,6 +609,34 @@ HWND hWndButton;
 				CheckMenuItem(GetMenu(hwnd),ID_MASK_3,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_MASK_5,MF_CHECKED);
 				break;
+			case ID_STILL:
+				CheckMenuItem(GetMenu(hwnd),ID_STILL,MF_CHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_GL,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_BLACK,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_WHITE,MF_UNCHECKED);
+				//do some magic here
+				break;
+			case ID_GL:
+				CheckMenuItem(GetMenu(hwnd),ID_STILL,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_GL,MF_CHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_BLACK,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_WHITE,MF_UNCHECKED);
+				//do some magic here
+				break;
+			case ID_WHITE:
+				CheckMenuItem(GetMenu(hwnd),ID_STILL,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_GL,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_BLACK,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_WHITE,MF_CHECKED);
+				//do some magic here
+				break;
+			case ID_BLACK:
+				CheckMenuItem(GetMenu(hwnd),ID_STILL,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_GL,MF_UNCHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_BLACK,MF_CHECKED);
+				CheckMenuItem(GetMenu(hwnd),ID_WHITE,MF_UNCHECKED);
+				//do some magic here
+				break;
 		  case ID_MENU_EXIT:
 			  PostQuitMessage(0);
 			  break;
@@ -644,7 +692,9 @@ HWND hWndButton;
 			  }
 	    }
 	  break;
-
+	  case WM_SIZE:
+		  ReSizeGLScene(LOWORD(lParam),HIWORD(lParam));
+		  break;
   case WM_DESTROY:
     //DeleteObject(hBitmap);
 
@@ -663,14 +713,8 @@ HWND hWndButton;
     }
     delete g_colorDetection;
 
-
-
-
     PostQuitMessage(0);
     break;
-  case WM_SIZE:
-	  //rozmiar okna
-	  break;
   }
 
   return DefWindowProc (hwnd, message, wParam, lParam);
@@ -680,7 +724,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 {
   //Definicja klasy okna
   WNDCLASS wc;
-  wc.style = CS_HREDRAW | CS_VREDRAW;
+  wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
   wc.lpfnWndProc = (WNDPROC)WndProc;
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
@@ -711,10 +755,63 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
   // Sprawdzenie czy okienko siê utworzy³o
   if ( hWnd == NULL ) return( FALSE );
 
+  static PIXELFORMATDESCRIPTOR pfd=
+  {
+	  sizeof(PIXELFORMATDESCRIPTOR),
+	  1,
+	  PFD_DRAW_TO_WINDOW |
+	  PFD_SUPPORT_OPENGL |
+	  PFD_DOUBLEBUFFER,
+	  PFD_TYPE_RGBA,
+	  16,
+	  0, 0, 0, 0, 0, 0,
+	  0,
+	  0,
+	  0,
+	  0, 0, 0, 0,
+	  16,
+	  0,
+	  0,
+	  PFD_MAIN_PLANE,
+	  0,
+	  0, 0, 0
+  };
+  
+  HDC hDC = NULL;
+  HGLRC hRC = NULL;
+  GLuint PixelFormat;
+ 
+  if(!(hDC=GetDC(hWnd))) return 0;
+  if(!(PixelFormat=ChoosePixelFormat(hDC,&pfd))) return 0;
+  if(!(SetPixelFormat(hDC,PixelFormat,&pfd))) return 0;
+  if(!(hRC=wglCreateContext(hDC))) return 0;
+  //if(!wglMakeCurrent(hDC,hRC)) return 0;
+
   // Pokazanie okinka na ekranie
-  ShowWindow(hWnd,iCmdShow);
+  ShowWindow(hWnd,SW_SHOW);
+  SetForegroundWindow(hWnd);
+  SetFocus(hWnd);
 
   MSG msg;
+
+  BOOL done = false;
+  while(!done) {
+	  if(PeekMessage(&msg,NULL,0,0,PM_REMOVE)){
+		  if (msg.message==WM_QUIT) {done= true;}
+		  else
+		  {
+			  TranslateMessage(&msg);
+			  DispatchMessage(&msg);
+		  }
+	  }
+	  else
+	  {
+		  //DrawGLScene();
+		  SwapBuffers(hDC);
+	  }
+  }
+
+
 
   // G³ówna pêtla komunikatów
   while( GetMessage( &msg, NULL, 0, 0) )
@@ -722,6 +819,12 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     TranslateMessage(&msg);
     DispatchMessage(&msg);
   }
-
+  if (hRC) {
+	  !wglMakeCurrent(NULL,NULL);
+	  !wglDeleteContext(hRC);
+	  hRC=NULL;
+  }
+  if (hDC && !ReleaseDC(hWnd,hDC)) {hDC=NULL;}
+  if (hWnd && !DestroyWindow(hWnd)) {hWnd=NULL;}
   return 0;
 }

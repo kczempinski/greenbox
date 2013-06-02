@@ -33,4 +33,9 @@
 #define ID_MASK_3 110
 #define ID_MASK_5 111
 
+#define ID_STILL 120
+#define ID_GL 121
+#define ID_WHITE 122
+#define ID_BLACK 123
+
 #endif

@@ -17,6 +17,13 @@ BEGIN
 		MENUITEM "Combined",ID_COMB, CHECKED
 		MENUITEM "Mask",ID_FILTERED
 		END
+	POPUP "&Background"
+		BEGIN
+		MENUITEM "Still image from BPM/PPM file",ID_STILL, CHECKED
+		MENUITEM "Open GL animated",ID_GL
+		MENUITEM "White",ID_WHITE
+		MENUITEM "Black",ID_BLACK
+		END
 	POPUP "&Mask"
 		BEGIN
 		MENUITEM "Off",ID_MASK_OFF
