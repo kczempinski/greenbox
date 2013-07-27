@@ -1280,7 +1280,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 	  else
 	  {
 		  DrawGLScene();
-		 glReadBuffer(GL_BACK);
+		 glReadBuffer(GL_FRONT);
 		glReadPixels(0,0,g_iWidth,g_iHeight,GL_RGB,GL_UNSIGNED_INT,&data[0]);
 		  SwapBuffers(hDC);
 
