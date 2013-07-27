@@ -24,7 +24,7 @@ bool g_bIsGetFrame;
 
 int g_iWidth = 640;
 int g_iHeight = 480;
-int g_iCalibFrameSize =150;
+int g_iCalibFrameSize =15;
 int g_iCalibFrameThick = 3;
 
 unsigned char *g_pRGBBack;
@@ -692,6 +692,9 @@ HWND hWndButton;
 			  }
 	    }
 	  break;
+	  case WM_CLOSE:
+		  PostQuitMessage(0);
+		  break;
 	  case WM_SIZE:
 		  ReSizeGLScene(LOWORD(lParam),HIWORD(lParam));
 		  break;
