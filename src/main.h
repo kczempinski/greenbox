@@ -18,6 +18,7 @@
 #define GRINBOX_APP_CLASS_NAME TEXT("GrinboxAppClass")
 
 #define GRINBOX_APP_WINDOW_NAME TEXT("GrinboxAppWindow")
+#define GRINBOX_APP_GL_WINDOW TEXT("OpenGL Window")
 
 #define GRINBOX_MAIN_MENU 102
 

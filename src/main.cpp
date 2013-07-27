@@ -9,6 +9,11 @@
 #pragma comment( lib, "glu32.lib" )
 //#pragma comment( lib, "glaux.lib" )
 
+#include <vector>
+
+
+
+
 HINSTANCE hInst;
 
 videoInput VI;
@@ -26,6 +31,9 @@ int g_iWidth = 640;
 int g_iHeight = 480;
 int g_iCalibFrameSize =15;
 int g_iCalibFrameThick = 3;
+
+#define GL_BGRA 0x80E1
+std::vector<unsigned int> data(g_iWidth*g_iHeight*3);	
 
 unsigned char *g_pRGBBack;
 int g_iBackWidth;
@@ -390,9 +398,9 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 						  {
 							if(g_colorDetection[(unsigned char)Y][(unsigned char)U][(unsigned char)V]>1)
 							{
-								g_last[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
-								g_last[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
-								g_last[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
+								g_last[(i*iWidth+j)*3+0] = data/*g_pRGBBack*/[(2*i*g_iBackWidth+j)*3+0]; //0;
+								g_last[(i*iWidth+j)*3+1] = data/*g_pRGBBack*/[(2*i*g_iBackWidth+j)*3+1]; // 0;
+								g_last[(i*iWidth+j)*3+2] = data/*g_pRGBBack*/[(2*i*g_iBackWidth+j)*3+2]; //0;
 							}
 		
 						}
@@ -457,6 +465,8 @@ void xDisplayBmpOnWindow(HWND hWnd,int iX, int iY, unsigned char* pRGBSample, in
   ReleaseDC(hWnd,hDC);
 }
 
+
+
 GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 {
 	if(height==0)
@@ -464,12 +474,458 @@ GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 		height=1;
 	}
 
-	glViewport(0,0,width,height);
+	glViewport(0,0,g_iWidth,g_iHeight);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,1000.0f);
+	gluPerspective(45.0f,(GLfloat)g_iWidth/(GLfloat)g_iHeight,0.1f,1000.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+}
+
+int DrawGLScene(GLvoid)
+
+{
+
+	static GLfloat rot = 0.0;
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
+	glLoadIdentity();
+
+	glTranslatef(0,5,-20);
+
+	glRotatef(rot++, 0,1,0);
+
+
+
+	glEnable(GL_DEPTH_TEST);
+
+
+
+/*
+
+	GLUquadricObj *quadraticCzapka;
+
+	quadraticCzapka = gluNewQuadric();
+
+	glPushMatrix();
+
+	glTranslatef(0, 1.4, -0.5);
+
+	glRotatef(70.0f, 1.0f, 0.0f, 0.0f);
+
+	//glRotatef(-10.0f, 0.0f, 1.0f, 0.0f);
+
+	gluCylinder(quadraticCzapka, 0, 1.2, 1.5, 32, 32);
+
+	glPopMatrix();*/
+
+
+
+	//glowa
+
+	glBegin( GL_LINE_LOOP );
+
+	GLUquadricObj *quadric;
+
+	quadric = gluNewQuadric();
+
+	glColor3d(1,1,0);
+
+	gluQuadricDrawStyle(quadric, GLU_FILL );
+
+	gluSphere( quadric , 3.00 , 36 , 18 );
+
+
+
+	gluDeleteQuadric(quadric); 
+
+	glEndList(); 
+
+
+
+	/*GLUquadricObj *quadratic;
+
+	quadratic = gluNewQuadric();
+
+	glColor3d(1,0,0);
+
+	glPushMatrix();
+
+	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+
+	gluCylinder(quadratic, 0.25, 0.25, 1.5, 32, 32);
+
+	glPopMatrix();*/
+
+
+
+	GLdouble a,b,c;
+
+	a = 4; b = -5; c = 2;
+
+	//tulow
+
+	glTranslatef(-2,-1,-1);
+
+	glBegin(GL_QUADS);
+
+	glColor3d(1,1,1);
+
+	glNormal3d(0,-1,0);
+
+	glVertex3d(0,0,0);
+
+	glVertex3d(0,0,c);
+
+	glVertex3d(a,0,c);
+
+	glVertex3d(a,0,0);
+
+
+
+	
+
+	glNormal3d(1,0,0);
+
+	glVertex3d(a,0,0);
+
+	glVertex3d(a,0,c);
+
+	glVertex3d(a,b,c);
+
+	glVertex3d(a,b,0);
+
+
+
+	
+
+	glNormal3d(0,1,0);
+
+	glVertex3d(a,b,0);
+
+	glVertex3d(a,b,c);
+
+	glVertex3d(0,b,c);
+
+	glVertex3d(0,b,0);
+
+
+
+	
+
+	glNormal3d(-1,0,0);
+
+	glVertex3d(0,b,0);
+
+	glVertex3d(0,b,c);
+
+	glVertex3d(0,0,c);
+
+	glVertex3d(0,0,0);
+
+
+
+	
+
+	glNormal3d(0,0,1);
+
+	glVertex3d(0,0,c);
+
+	glVertex3d(0,b,c);
+
+	glVertex3d(a,b,c);
+
+	glVertex3d(a,0,c);
+
+
+
+	
+
+	glNormal3d(0,0,-1);
+
+	glVertex3d(0,0,0);
+
+	glVertex3d(a,0,0);
+
+	glVertex3d(a,b,0);
+
+	glVertex3d(0,b,0);
+
+	glEnd();
+
+
+
+	glEnable(GL_DEPTH_TEST);
+
+	glColor3d(1,0,0);
+
+	glTranslatef(0.3, -0.6, 1);
+
+	GLUquadricObj *quadraticReka;
+
+	quadraticReka = gluNewQuadric();
+
+	glPushMatrix();
+
+	glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+
+	glRotatef(45.0f, 1.0f, 0.0f, 0.0f);
+
+	gluCylinder(quadraticReka, 0.5, 0.5, 4, 32, 32);
+
+	glPopMatrix();
+
+
+
+	glTranslatef(3.4, 0, 0);
+
+	GLUquadricObj *quadraticReka2;
+
+	quadraticReka2 = gluNewQuadric();
+
+	glPushMatrix();
+
+	glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+
+	glRotatef(45.0f, 1.0f, 0.0f, 0.0f);
+
+	gluCylinder(quadraticReka2, 0.5, 0.5, 4, 32, 32);
+
+	glPopMatrix();
+
+
+
+	glColor3d(0,0,1);
+
+	glTranslatef(-0.5, -4.3, 0);
+
+	GLUquadricObj *quadraticNoga;
+
+	quadraticNoga = gluNewQuadric();
+
+	glPushMatrix();
+
+	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+
+	glRotatef(10.0f, 0.0f, 1.0f, 0.0f);
+
+	gluCylinder(quadraticNoga, 0.7, 0.7, 6, 32, 32);
+
+	glPopMatrix();
+
+
+
+	glColor3d(0,1,1);
+
+	glTranslatef(-2.3, 0, 0);
+
+	GLUquadricObj *quadraticNoga2;
+
+	quadraticNoga2 = gluNewQuadric();
+
+	glPushMatrix();
+
+	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+
+	glRotatef(-10.0f, 0.0f, 1.0f, 0.0f);
+
+	gluCylinder(quadraticNoga2, 0.7, 0.7, 6, 32, 32);
+
+	glPopMatrix();
+
+
+
+	glEnd();
+
+
+
+	
+
+	/*a = 1.7; b = 0.8; c = 3;
+
+	glTranslatef(-1.8,-6,-0.8);
+
+	glBegin(GL_QUADS);
+
+	glColor3d(1,1,0);
+
+	glNormal3d(0,-1,0);
+
+	glVertex3d(0,0,0);
+
+	glVertex3d(0,0,c);
+
+	glVertex3d(a,0,c);
+
+	glVertex3d(a,0,0);
+
+
+
+	
+
+	glNormal3d(1,0,0);
+
+	glVertex3d(a,0,0);
+
+	glVertex3d(a,0,c);
+
+	glVertex3d(a,b,c);
+
+	glVertex3d(a,b,0);
+
+
+
+	
+
+	glNormal3d(0,1,0);
+
+	glVertex3d(a,b,0);
+
+	glVertex3d(a,b,c);
+
+	glVertex3d(0,b,c);
+
+	glVertex3d(0,b,0);
+
+
+
+	
+
+	glNormal3d(-1,0,0);
+
+	glVertex3d(0,b,0);
+
+	glVertex3d(0,b,c);
+
+	glVertex3d(0,0,c);
+
+	glVertex3d(0,0,0);
+
+
+
+	
+
+	glNormal3d(0,0,1);
+
+	glVertex3d(0,0,c);
+
+	glVertex3d(0,b,c);
+
+	glVertex3d(a,b,c);
+
+	glVertex3d(a,0,c);
+
+
+
+	
+
+	glNormal3d(0,0,-1);
+
+	glVertex3d(0,0,0);
+
+	glVertex3d(a,0,0);
+
+	glVertex3d(a,b,0);
+
+	glVertex3d(0,b,0);
+
+	glEnd();
+
+
+
+	a = 1.7; b = 0.8; c = 3;
+
+	glTranslatef(4.2,0,0);
+
+	glBegin(GL_QUADS);
+
+	glNormal3d(0,-1,0);
+
+	glVertex3d(0,0,0);
+
+	glVertex3d(0,0,c);
+
+	glVertex3d(a,0,c);
+
+	glVertex3d(a,0,0);
+
+
+
+	
+
+	glNormal3d(1,0,0);
+
+	glVertex3d(a,0,0);
+
+	glVertex3d(a,0,c);
+
+	glVertex3d(a,b,c);
+
+	glVertex3d(a,b,0);
+
+
+
+	
+
+	glNormal3d(0,1,0);
+
+	glVertex3d(a,b,0);
+
+	glVertex3d(a,b,c);
+
+	glVertex3d(0,b,c);
+
+	glVertex3d(0,b,0);
+
+
+
+	
+
+	glNormal3d(-1,0,0);
+
+	glVertex3d(0,b,0);
+
+	glVertex3d(0,b,c);
+
+	glVertex3d(0,0,c);
+
+	glVertex3d(0,0,0);
+
+
+
+	
+
+	glNormal3d(0,0,1);
+
+	glVertex3d(0,0,c);
+
+	glVertex3d(0,b,c);
+
+	glVertex3d(a,b,c);
+
+	glVertex3d(a,0,c);
+
+
+
+	
+
+	glNormal3d(0,0,-1);
+
+	glVertex3d(0,0,0);
+
+	glVertex3d(a,0,0);
+
+	glVertex3d(a,b,0);
+
+	glVertex3d(0,b,0);*/
+
+	glEnd();
+
+	return 1;
+
 }
 
 LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -522,7 +978,7 @@ HWND hWndButton;
     {
     case GRINBOX_ID_TIMER_GET_FRAME:
       xGetFrame(g_pRGBOriginalSample);  //Pobranie 1 ramki obrazu z kamery
-
+	  
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wywo³anie procedury przetwarzaj¹cej obraz
     //  xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wyœwitlenie 1 ramki obrazu na okienku
 	  if (combined) xDisplayBmpOnWindow(hwnd,0,0,g_last,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
@@ -683,8 +1139,8 @@ HWND hWndButton;
 					if(strstr(ofn.lpstrFile,".bmp"))	  
 					g_pRGBBack = ReadBmpFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
 
-					if(!strstr(ofn.lpstrFile,".bmp")&&!strstr(ofn.lpstrFile,".ppm"))
-						MessageBox(0,TEXT("Why ya clickin if not openin, dude?"),TEXT("WTF?"),MB_OK);
+					//if(!strstr(ofn.lpstrFile,".bmp")&&!strstr(ofn.lpstrFile,".ppm"))
+						//MessageBox(0,TEXT("Why ya clickin if not openin, dude?"),TEXT("WTF?"),MB_OK);
 
 					
 
@@ -755,6 +1211,19 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     hInstance,
     NULL);
 
+  HWND hWnd2 = CreateWindow(
+    GRINBOX_APP_CLASS_NAME,
+    GRINBOX_APP_GL_WINDOW,
+    WS_OVERLAPPEDWINDOW,
+    0,
+    0,
+	g_iWidth+160,
+    g_iHeight,
+    NULL,
+    NULL,
+    hInstance,
+    NULL);
+
   // Sprawdzenie czy okienko siê utworzy³o
   if ( hWnd == NULL ) return( FALSE );
 
@@ -784,14 +1253,15 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
   HGLRC hRC = NULL;
   GLuint PixelFormat;
  
-  if(!(hDC=GetDC(hWnd))) return 0;
+  if(!(hDC=GetDC(hWnd2))) return 0;
   if(!(PixelFormat=ChoosePixelFormat(hDC,&pfd))) return 0;
   if(!(SetPixelFormat(hDC,PixelFormat,&pfd))) return 0;
   if(!(hRC=wglCreateContext(hDC))) return 0;
-  //if(!wglMakeCurrent(hDC,hRC)) return 0;
+  if(!wglMakeCurrent(hDC,hRC)) return 0;
 
   // Pokazanie okinka na ekranie
   ShowWindow(hWnd,SW_SHOW);
+  //ShowWindow(hWnd2,SW_SHOW);
   SetForegroundWindow(hWnd);
   SetFocus(hWnd);
 
@@ -809,8 +1279,11 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 	  }
 	  else
 	  {
-		  //DrawGLScene();
+		  DrawGLScene();
+		 glReadBuffer(GL_BACK);
+		glReadPixels(0,0,g_iWidth,g_iHeight,GL_RGB,GL_UNSIGNED_INT,&data[0]);
 		  SwapBuffers(hDC);
+
 	  }
   }
 
