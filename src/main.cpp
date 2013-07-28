@@ -44,6 +44,11 @@ bool back;
 bool cam;
 bool filtered;
 
+bool black=1;
+bool white=0;
+bool still=0;
+bool gl=0;
+
 int maskSize=0;		
 int mask=1;
 
@@ -398,9 +403,30 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 						  {
 							if(g_colorDetection[(unsigned char)Y][(unsigned char)U][(unsigned char)V]>1)
 							{
-								g_last[(i*iWidth+j)*3+0] = data/*g_pRGBBack*/[(2*i*g_iBackWidth+j)*3+0]; //0;
-								g_last[(i*iWidth+j)*3+1] = data/*g_pRGBBack*/[(2*i*g_iBackWidth+j)*3+1]; // 0;
-								g_last[(i*iWidth+j)*3+2] = data/*g_pRGBBack*/[(2*i*g_iBackWidth+j)*3+2]; //0;
+								if (still)
+								{
+									g_last[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
+								g_last[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
+								g_last[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
+								}
+								if (gl){
+									g_last[(i*iWidth+j)*3+0] = data[(2*i*g_iBackWidth+j)*3+0]; //0;
+								g_last[(i*iWidth+j)*3+1] = data[(2*i*g_iBackWidth+j)*3+1]; // 0;
+								g_last[(i*iWidth+j)*3+2] = data[(2*i*g_iBackWidth+j)*3+2]; //0;
+								}
+								if (black)
+								{
+									g_last[(i*iWidth+j)*3+0] = 0;
+								g_last[(i*iWidth+j)*3+1] = 0;
+								g_last[(i*iWidth+j)*3+2] = 0;
+								}
+								if (white)
+								{
+									g_last[(i*iWidth+j)*3+0] = 255;
+								g_last[(i*iWidth+j)*3+1] = 255;
+								g_last[(i*iWidth+j)*3+2] = 255;
+								}
+								
 							}
 		
 						}
@@ -464,8 +490,6 @@ void xDisplayBmpOnWindow(HWND hWnd,int iX, int iY, unsigned char* pRGBSample, in
 
   ReleaseDC(hWnd,hDC);
 }
-
-
 
 GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 {
@@ -962,7 +986,7 @@ HWND hWndButton;
       }
     }
 
-    SetTimer(hwnd,GRINBOX_ID_TIMER_GET_FRAME,40,NULL); //Ustawienie minutnika na co 40 milisekund
+    SetTimer(hwnd,GRINBOX_ID_TIMER_GET_FRAME,1000/15,NULL); //Ustawienie minutnika na co 40 milisekund
 
 	 g_bIsCalibrating = false;
     g_bIsGetFrame = false;
@@ -982,7 +1006,10 @@ HWND hWndButton;
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wywo³anie procedury przetwarzaj¹cej obraz
     //  xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wyœwitlenie 1 ramki obrazu na okienku
 	  if (combined) xDisplayBmpOnWindow(hwnd,0,0,g_last,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
-	  if (back)xDisplayBmpOnWindow(hwnd,0,0,g_pRGBBack,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
+	  if (back) {
+		  if(still) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBBack,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
+		  //if(gl) xDisplayBmpOnWindow(hwnd,0,0,data,g_iWidth,g_iHeight);
+	  }
 	  if (cam) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
 	  if (filtered) xDisplayBmpOnWindow(hwnd,0,0,g_temp,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
       break;
@@ -1070,28 +1097,40 @@ HWND hWndButton;
 				CheckMenuItem(GetMenu(hwnd),ID_GL,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_BLACK,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_WHITE,MF_UNCHECKED);
-				//do some magic here
+				still=true;
+				black=false;
+				white=false;
+				gl=false;
 				break;
 			case ID_GL:
 				CheckMenuItem(GetMenu(hwnd),ID_STILL,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_GL,MF_CHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_BLACK,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_WHITE,MF_UNCHECKED);
-				//do some magic here
+				still=false;
+				black=false;
+				white=false;
+				gl=true;
 				break;
 			case ID_WHITE:
 				CheckMenuItem(GetMenu(hwnd),ID_STILL,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_GL,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_BLACK,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_WHITE,MF_CHECKED);
-				//do some magic here
+				still=false;
+				black=false;
+				white=true;
+				gl=false;
 				break;
 			case ID_BLACK:
 				CheckMenuItem(GetMenu(hwnd),ID_STILL,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_GL,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_BLACK,MF_CHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_WHITE,MF_UNCHECKED);
-				//do some magic here
+				still=false;
+				black=true;
+				white=false;
+				gl=false;
 				break;
 		  case ID_MENU_EXIT:
 			  PostQuitMessage(0);
@@ -1214,12 +1253,12 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
   HWND hWnd2 = CreateWindow(
     GRINBOX_APP_CLASS_NAME,
     GRINBOX_APP_GL_WINDOW,
-    WS_OVERLAPPEDWINDOW,
+    WS_CHILDWINDOW,
     0,
     0,
 	g_iWidth+160,
     g_iHeight,
-    NULL,
+    hWnd,
     NULL,
     hInstance,
     NULL);
@@ -1279,10 +1318,12 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 	  }
 	  else
 	  {
-		  DrawGLScene();
+		  if(gl) {DrawGLScene();
 		 glReadBuffer(GL_FRONT);
 		glReadPixels(0,0,g_iWidth,g_iHeight,GL_RGB,GL_UNSIGNED_INT,&data[0]);
-		  SwapBuffers(hDC);
+		SwapBuffers(hDC);}
+
+		  
 
 	  }
   }
