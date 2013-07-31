@@ -13,8 +13,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-
-
 HINSTANCE hInst;
 
 videoInput VI;
@@ -22,7 +20,6 @@ unsigned char *g_pRGBOriginalSample;
 unsigned char *g_pRGBProcesedSample;
 unsigned char *g_last;
 unsigned char *g_temp;
-
 
 unsigned int ***g_colorDetection;
 bool g_bIsCalibrating;
@@ -45,13 +42,15 @@ bool back;
 bool cam;
 bool filtered;
 
-bool black=1;
+bool black=0;
 bool white=0;
 bool still=0;
-bool gl=0;
+bool gl=1;
 
 int maskSize=0;		
 int mask=1;
+
+HWND hWnd, hWnd2;
 
 void xEndCalibrate()
 {
@@ -78,17 +77,6 @@ void xEndCalibrate()
       if(iMax<ppHist[i][j]) iMax = ppHist[i][j];
     }
   }
-
-  //Create Histogram for display
- /* for(int i=0;i<256;i++)
-  {
-    for(int j=0;j<256;j++)
-    {
-      g_pRGBHistogramSample[(i*256+j)*3+0] = ppHist[i][j]*256/iMax;
-      g_pRGBHistogramSample[(i*256+j)*3+1] = ppHist[i][j]*256/iMax;
-      g_pRGBHistogramSample[(i*256+j)*3+2] = ppHist[i][j]*256/iMax;
-    }
-  } */
 
   //Deallokacje Pamieci
   for(int i=0;i<256;i++)
@@ -310,12 +298,6 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
       pRGBDsrSample[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
       pRGBDsrSample[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
       pRGBDsrSample[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
-	  //g_temp=pRGBDsrSample;
-/*
-	  g_last[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
-	  g_last[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
-	  g_last[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
-*/
 	}
   }
 
@@ -355,32 +337,11 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 							float Y = 0.299f*R+0.587f*G+0.114f*B;
 							float U = -0.147f*R-0.289f*G+0.437f*B;
 							float V = 0.615f*R-0.515f*G+0.100f*B;
-				   /*
-					if((U<0)&&(V<0))
-					{
-					
-					g_last[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
-					g_last[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
-					g_last[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
-
-					}
-					else
-					{
-					
-					g_last[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
-					g_last[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
-					g_last[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
-					} 
-					
-				  */
-
 					
 					g_last[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
 					g_last[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
 					g_last[(i*iWidth+j)*3+2] = pRGBDsrSample[(i*iWidth+j)*3+2];
-					
-					
-					
+						
 					 if(g_bIsCalibrating)
 					 {
 							//Przetwarzaj œrodek ekranu
@@ -509,16 +470,12 @@ GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 
 int DrawGLScene(GLvoid)
 {
-
 static GLfloat rot=0.0;
 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 glLoadIdentity();
 glTranslatef(0,0,-10);
 
-
-
-glRotatef(rot=rot+0.001*1000  , -rot-0.002*1000 ,   rot=rot+0.0012*1000   ,   rot=rot+0.005*1000   );
-
+glRotatef(rot=rot+0.001*1000, -rot-0.002*1000, rot=rot+0.0012*1000, rot=rot+0.005*1000);//troche przyspiesyzlem bo u mnie wgl ruchu nie bylo widac.
 
 glEnable(GL_DEPTH_TEST);
 
@@ -528,8 +485,6 @@ glColor3d(1,1,0);
 glTranslatef(0, 0, 0);
 gluSphere( quadric6 , 1 , 36 , 18 );
 gluDeleteQuadric(quadric6); 
-
-
 
 GLUquadricObj *quadric;
 quadric = gluNewQuadric();
@@ -544,8 +499,6 @@ glColor3d(0,0.3,0.2);
 glTranslatef(5, 0, 0);
 gluSphere( quadric5 , 0.9 , 36 , 20);
 gluDeleteQuadric(quadric5); 
-
-
 
 GLUquadricObj *quadric7;
 quadric7 = gluNewQuadric();
@@ -591,7 +544,7 @@ HWND hWndButton;
       }
     }
 
-    SetTimer(hwnd,GRINBOX_ID_TIMER_GET_FRAME,1000/15,NULL); //Ustawienie minutnika na co 40 milisekund
+    SetTimer(hwnd,GRINBOX_ID_TIMER_GET_FRAME,1000/15,NULL); //Ustawienie minutnika na co 40 milisekund// na 15 zeby mniej zarzynac procka
 
 	 g_bIsCalibrating = false;
     g_bIsGetFrame = false;
@@ -611,10 +564,7 @@ HWND hWndButton;
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wywo³anie procedury przetwarzaj¹cej obraz
     //  xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wyœwitlenie 1 ramki obrazu na okienku
 	  if (combined) xDisplayBmpOnWindow(hwnd,0,0,g_last,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
-	  if (back) {
-		  if(still) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBBack,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
-		  //if(gl) xDisplayBmpOnWindow(hwnd,0,0,data,g_iWidth,g_iHeight);
-	  }
+	  if (back) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBBack,g_iWidth,g_iHeight); 
 	  if (cam) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
 	  if (filtered) xDisplayBmpOnWindow(hwnd,0,0,g_temp,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
       break;
@@ -651,6 +601,7 @@ HWND hWndButton;
 				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_FILTERED,MF_UNCHECKED);
+				ShowWindow(hWnd2,SW_SHOW);
 				break;
 			case ID_CAM:
 				cam=true;
@@ -741,7 +692,7 @@ HWND hWndButton;
 			  PostQuitMessage(0);
 			  break;
 		  case ID_MENU_ABOUT:
-			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\n\nversion 0.97 Beta (pre-release)"),TEXT("About"),MB_OK);
+			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\n\nversion 0.97 Beta (pre-release)"),TEXT("About"),MB_OK);//skad Marcin te wersje bierzesz? :D
 			  break;
 		  case ID_MENU_LOADBACKGROUND:
 			  {
@@ -783,11 +734,6 @@ HWND hWndButton;
 					if(strstr(ofn.lpstrFile,".bmp"))	  
 					g_pRGBBack = ReadBmpFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
 
-					//if(!strstr(ofn.lpstrFile,".bmp")&&!strstr(ofn.lpstrFile,".ppm"))
-						//MessageBox(0,TEXT("Why ya clickin if not openin, dude?"),TEXT("WTF?"),MB_OK);
-
-					
-
 					break;
 			  }
 	    }
@@ -822,7 +768,6 @@ HWND hWndButton;
 
   return DefWindowProc (hwnd, message, wParam, lParam);
 }
-
 
 LRESULT CALLBACK WndProc2 (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -867,7 +812,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
   wc.cbWndExtra = 0;
   wc.hInstance = hInstance;
   wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(GRINBOX_MAIN_ICON));
-  wc.hCursor = NULL;//LoadCursor(NULL, IDC_HAND);
+  wc.hCursor = NULL;
   wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
   wc.lpszMenuName = MAKEINTRESOURCE(GRINBOX_MAIN_MENU);
   wc.lpszClassName = GRINBOX_APP_CLASS_NAME;
@@ -879,7 +824,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
   wc2.cbWndExtra = 0;
   wc2.hInstance = hInstance;
   wc2.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(GRINBOX_MAIN_ICON));
-  wc2.hCursor = NULL;//LoadCursor(NULL, IDC_HAND);
+  wc2.hCursor = NULL;
   wc2.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
   wc2.lpszMenuName = NULL;
   wc2.lpszClassName = "Open GL";
@@ -889,7 +834,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
   if ( !RegisterClass( &wc2 ) ) return( FALSE );
 
   // Tworzenie g³ównego okna aplikacji
-  HWND hWnd = CreateWindow(
+   hWnd = CreateWindow(
     GRINBOX_APP_CLASS_NAME,
     GRINBOX_APP_WINDOW_NAME,
     WS_OVERLAPPEDWINDOW,
@@ -902,7 +847,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     hInstance,
     NULL);
 
-  HWND hWnd2 = CreateWindow(
+   hWnd2 = CreateWindow(
     "Open GL",
     GRINBOX_APP_GL_WINDOW,
     WS_OVERLAPPEDWINDOW,
@@ -952,7 +897,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 
   // Pokazanie okinka na ekranie
   ShowWindow(hWnd,SW_SHOW);
-  ShowWindow(hWnd2,SW_SHOW);
+  //ShowWindow(hWnd2,SW_SHOW);
   SetForegroundWindow(hWnd);
   SetFocus(hWnd);
 
@@ -970,17 +915,14 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 	  }
 	  else
 	  {
-		  if(gl) {DrawGLScene();
+		  if(gl) {
+			  DrawGLScene();
 		 glReadBuffer(GL_FRONT);
-		glReadPixels(0,0,g_iWidth,g_iHeight,GL_RGB,GL_UNSIGNED_INT,&data[0]);
-		SwapBuffers(hDC);}
-
-		  
-
+		 glReadPixels(0,0,g_iWidth,g_iHeight,GL_BGR_EXT,GL_UNSIGNED_INT,&data[0]);
+		SwapBuffers(hDC);
+		  }
 	  }
   }
-
-
 
   // G³ówna pêtla komunikatów
   while( GetMessage( &msg, NULL, 0, 0) )
