@@ -10,7 +10,8 @@
 //#pragma comment( lib, "glaux.lib" )
 
 #include <vector>
-
+#include <stdlib.h>
+#include <time.h>
 
 
 
@@ -507,449 +508,53 @@ GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 }
 
 int DrawGLScene(GLvoid)
-
 {
 
-	static GLfloat rot = 0.0;
+static GLfloat rot=0.0;
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+glLoadIdentity();
+glTranslatef(0,0,-10);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+glRotatef(rot=rot+0.001*1000  , -rot-0.002*1000 ,   rot=rot+0.0012*1000   ,   rot=rot+0.005*1000   );
 
-	glLoadIdentity();
 
-	glTranslatef(0,5,-20);
+glEnable(GL_DEPTH_TEST);
 
-	glRotatef(rot++, 0,1,0);
+GLUquadricObj *quadric6;
+quadric6 = gluNewQuadric();
+glColor3d(1,1,0);
+glTranslatef(0, 0, 0);
+gluSphere( quadric6 , 1 , 36 , 18 );
+gluDeleteQuadric(quadric6); 
 
 
 
-	glEnable(GL_DEPTH_TEST);
+GLUquadricObj *quadric;
+quadric = gluNewQuadric();
+glColor3d(0,0.1,0.2);
+glTranslatef(-2, 0, 0);
+gluSphere( quadric , 0.75 , 36 , 18 );
+gluDeleteQuadric(quadric); 
 
+GLUquadricObj *quadric5;
+quadric5 = gluNewQuadric();
+glColor3d(0,0.3,0.2);
+glTranslatef(5, 0, 0);
+gluSphere( quadric5 , 0.9 , 36 , 20);
+gluDeleteQuadric(quadric5); 
 
 
-/*
 
-	GLUquadricObj *quadraticCzapka;
+GLUquadricObj *quadric7;
+quadric7 = gluNewQuadric();
+glColor3d(0.2,0.1,0);
+glTranslatef(0, 3, 3);
+gluSphere( quadric7 , 0.2 , 30 , 10 );
+gluDeleteQuadric(quadric7); 
 
-	quadraticCzapka = gluNewQuadric();
-
-	glPushMatrix();
-
-	glTranslatef(0, 1.4, -0.5);
-
-	glRotatef(70.0f, 1.0f, 0.0f, 0.0f);
-
-	//glRotatef(-10.0f, 0.0f, 1.0f, 0.0f);
-
-	gluCylinder(quadraticCzapka, 0, 1.2, 1.5, 32, 32);
-
-	glPopMatrix();*/
-
-
-
-	//glowa
-
-	glBegin( GL_LINE_LOOP );
-
-	GLUquadricObj *quadric;
-
-	quadric = gluNewQuadric();
-
-	glColor3d(1,1,0);
-
-	gluQuadricDrawStyle(quadric, GLU_FILL );
-
-	gluSphere( quadric , 3.00 , 36 , 18 );
-
-
-
-	gluDeleteQuadric(quadric); 
-
-	glEndList(); 
-
-
-
-	/*GLUquadricObj *quadratic;
-
-	quadratic = gluNewQuadric();
-
-	glColor3d(1,0,0);
-
-	glPushMatrix();
-
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-
-	gluCylinder(quadratic, 0.25, 0.25, 1.5, 32, 32);
-
-	glPopMatrix();*/
-
-
-
-	GLdouble a,b,c;
-
-	a = 4; b = -5; c = 2;
-
-	//tulow
-
-	glTranslatef(-2,-1,-1);
-
-	glBegin(GL_QUADS);
-
-	glColor3d(1,1,1);
-
-	glNormal3d(0,-1,0);
-
-	glVertex3d(0,0,0);
-
-	glVertex3d(0,0,c);
-
-	glVertex3d(a,0,c);
-
-	glVertex3d(a,0,0);
-
-
-
-	
-
-	glNormal3d(1,0,0);
-
-	glVertex3d(a,0,0);
-
-	glVertex3d(a,0,c);
-
-	glVertex3d(a,b,c);
-
-	glVertex3d(a,b,0);
-
-
-
-	
-
-	glNormal3d(0,1,0);
-
-	glVertex3d(a,b,0);
-
-	glVertex3d(a,b,c);
-
-	glVertex3d(0,b,c);
-
-	glVertex3d(0,b,0);
-
-
-
-	
-
-	glNormal3d(-1,0,0);
-
-	glVertex3d(0,b,0);
-
-	glVertex3d(0,b,c);
-
-	glVertex3d(0,0,c);
-
-	glVertex3d(0,0,0);
-
-
-
-	
-
-	glNormal3d(0,0,1);
-
-	glVertex3d(0,0,c);
-
-	glVertex3d(0,b,c);
-
-	glVertex3d(a,b,c);
-
-	glVertex3d(a,0,c);
-
-
-
-	
-
-	glNormal3d(0,0,-1);
-
-	glVertex3d(0,0,0);
-
-	glVertex3d(a,0,0);
-
-	glVertex3d(a,b,0);
-
-	glVertex3d(0,b,0);
-
-	glEnd();
-
-
-
-	glEnable(GL_DEPTH_TEST);
-
-	glColor3d(1,0,0);
-
-	glTranslatef(0.3, -0.6, 1);
-
-	GLUquadricObj *quadraticReka;
-
-	quadraticReka = gluNewQuadric();
-
-	glPushMatrix();
-
-	glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-
-	glRotatef(45.0f, 1.0f, 0.0f, 0.0f);
-
-	gluCylinder(quadraticReka, 0.5, 0.5, 4, 32, 32);
-
-	glPopMatrix();
-
-
-
-	glTranslatef(3.4, 0, 0);
-
-	GLUquadricObj *quadraticReka2;
-
-	quadraticReka2 = gluNewQuadric();
-
-	glPushMatrix();
-
-	glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-
-	glRotatef(45.0f, 1.0f, 0.0f, 0.0f);
-
-	gluCylinder(quadraticReka2, 0.5, 0.5, 4, 32, 32);
-
-	glPopMatrix();
-
-
-
-	glColor3d(0,0,1);
-
-	glTranslatef(-0.5, -4.3, 0);
-
-	GLUquadricObj *quadraticNoga;
-
-	quadraticNoga = gluNewQuadric();
-
-	glPushMatrix();
-
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-
-	glRotatef(10.0f, 0.0f, 1.0f, 0.0f);
-
-	gluCylinder(quadraticNoga, 0.7, 0.7, 6, 32, 32);
-
-	glPopMatrix();
-
-
-
-	glColor3d(0,1,1);
-
-	glTranslatef(-2.3, 0, 0);
-
-	GLUquadricObj *quadraticNoga2;
-
-	quadraticNoga2 = gluNewQuadric();
-
-	glPushMatrix();
-
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-
-	glRotatef(-10.0f, 0.0f, 1.0f, 0.0f);
-
-	gluCylinder(quadraticNoga2, 0.7, 0.7, 6, 32, 32);
-
-	glPopMatrix();
-
-
-
-	glEnd();
-
-
-
-	
-
-	/*a = 1.7; b = 0.8; c = 3;
-
-	glTranslatef(-1.8,-6,-0.8);
-
-	glBegin(GL_QUADS);
-
-	glColor3d(1,1,0);
-
-	glNormal3d(0,-1,0);
-
-	glVertex3d(0,0,0);
-
-	glVertex3d(0,0,c);
-
-	glVertex3d(a,0,c);
-
-	glVertex3d(a,0,0);
-
-
-
-	
-
-	glNormal3d(1,0,0);
-
-	glVertex3d(a,0,0);
-
-	glVertex3d(a,0,c);
-
-	glVertex3d(a,b,c);
-
-	glVertex3d(a,b,0);
-
-
-
-	
-
-	glNormal3d(0,1,0);
-
-	glVertex3d(a,b,0);
-
-	glVertex3d(a,b,c);
-
-	glVertex3d(0,b,c);
-
-	glVertex3d(0,b,0);
-
-
-
-	
-
-	glNormal3d(-1,0,0);
-
-	glVertex3d(0,b,0);
-
-	glVertex3d(0,b,c);
-
-	glVertex3d(0,0,c);
-
-	glVertex3d(0,0,0);
-
-
-
-	
-
-	glNormal3d(0,0,1);
-
-	glVertex3d(0,0,c);
-
-	glVertex3d(0,b,c);
-
-	glVertex3d(a,b,c);
-
-	glVertex3d(a,0,c);
-
-
-
-	
-
-	glNormal3d(0,0,-1);
-
-	glVertex3d(0,0,0);
-
-	glVertex3d(a,0,0);
-
-	glVertex3d(a,b,0);
-
-	glVertex3d(0,b,0);
-
-	glEnd();
-
-
-
-	a = 1.7; b = 0.8; c = 3;
-
-	glTranslatef(4.2,0,0);
-
-	glBegin(GL_QUADS);
-
-	glNormal3d(0,-1,0);
-
-	glVertex3d(0,0,0);
-
-	glVertex3d(0,0,c);
-
-	glVertex3d(a,0,c);
-
-	glVertex3d(a,0,0);
-
-
-
-	
-
-	glNormal3d(1,0,0);
-
-	glVertex3d(a,0,0);
-
-	glVertex3d(a,0,c);
-
-	glVertex3d(a,b,c);
-
-	glVertex3d(a,b,0);
-
-
-
-	
-
-	glNormal3d(0,1,0);
-
-	glVertex3d(a,b,0);
-
-	glVertex3d(a,b,c);
-
-	glVertex3d(0,b,c);
-
-	glVertex3d(0,b,0);
-
-
-
-	
-
-	glNormal3d(-1,0,0);
-
-	glVertex3d(0,b,0);
-
-	glVertex3d(0,b,c);
-
-	glVertex3d(0,0,c);
-
-	glVertex3d(0,0,0);
-
-
-
-	
-
-	glNormal3d(0,0,1);
-
-	glVertex3d(0,0,c);
-
-	glVertex3d(0,b,c);
-
-	glVertex3d(a,b,c);
-
-	glVertex3d(a,0,c);
-
-
-
-	
-
-	glNormal3d(0,0,-1);
-
-	glVertex3d(0,0,0);
-
-	glVertex3d(a,0,0);
-
-	glVertex3d(a,b,0);
-
-	glVertex3d(0,b,0);*/
-
-	glEnd();
-
-	return 1;
-
+return 1;
 }
 
 LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
