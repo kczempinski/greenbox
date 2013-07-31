@@ -741,7 +741,7 @@ HWND hWndButton;
 			  PostQuitMessage(0);
 			  break;
 		  case ID_MENU_ABOUT:
-			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\nunder Multimedia Scientific Circle\n\nversion 0.88.1 beta"),TEXT("About"),MB_OK);
+			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\n\nversion 0.97 Beta (pre-release)"),TEXT("About"),MB_OK);
 			  break;
 		  case ID_MENU_LOADBACKGROUND:
 			  {
@@ -758,7 +758,7 @@ HWND hWndButton;
 					// use the contents of szFile to initialize itself.
 					ofn.lpstrFile[0] = '\0';
 					ofn.nMaxFile = sizeof(szFile);
-					ofn.lpstrFilter = "PPM Files\0*.ppm\0BMP Files\0*.bmp\0";
+					ofn.lpstrFilter = "BMP Files\0*.bmp\0PPM Files\0*.ppm\0";
 					ofn.nFilterIndex = 1;
 					ofn.lpstrFileTitle = NULL;
 					ofn.nMaxFileTitle = 0;
