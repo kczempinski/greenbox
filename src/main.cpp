@@ -823,6 +823,40 @@ HWND hWndButton;
   return DefWindowProc (hwnd, message, wParam, lParam);
 }
 
+
+LRESULT CALLBACK WndProc2 (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+HWND hWndButton;
+  switch (message)
+  {
+  case WM_CREATE:
+    break;
+  case WM_PAINT:
+      break;
+    break;
+  case WM_TIMER:
+    
+    break;
+
+  case WM_COMMAND:
+	 
+	  break;
+	  case WM_CLOSE:
+		  PostQuitMessage(0);
+		  break;
+	  case WM_SIZE:
+		  ReSizeGLScene(LOWORD(lParam),HIWORD(lParam));
+		  break;
+  case WM_DESTROY:
+    //DeleteObject(hBitmap);
+    PostQuitMessage(0);
+    break;
+  }
+
+  return DefWindowProc (hwnd, message, wParam, lParam);
+}
+
+
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 {
   //Definicja klasy okna
@@ -838,8 +872,21 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
   wc.lpszMenuName = MAKEINTRESOURCE(GRINBOX_MAIN_MENU);
   wc.lpszClassName = GRINBOX_APP_CLASS_NAME;
 
+   WNDCLASS wc2;
+  wc2.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+  wc2.lpfnWndProc = (WNDPROC)WndProc2;
+  wc2.cbClsExtra = 0;
+  wc2.cbWndExtra = 0;
+  wc2.hInstance = hInstance;
+  wc2.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(GRINBOX_MAIN_ICON));
+  wc2.hCursor = NULL;//LoadCursor(NULL, IDC_HAND);
+  wc2.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+  wc2.lpszMenuName = NULL;
+  wc2.lpszClassName = "Open GL";
+
   //Rejestracja klasy okna
   if ( !RegisterClass( &wc ) ) return( FALSE );
+  if ( !RegisterClass( &wc2 ) ) return( FALSE );
 
   // Tworzenie g³ównego okna aplikacji
   HWND hWnd = CreateWindow(
@@ -856,14 +903,14 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     NULL);
 
   HWND hWnd2 = CreateWindow(
-    GRINBOX_APP_CLASS_NAME,
+    "Open GL",
     GRINBOX_APP_GL_WINDOW,
-    WS_CHILDWINDOW,
+    WS_OVERLAPPEDWINDOW,
     0,
     0,
 	g_iWidth+160,
     g_iHeight,
-    hWnd,
+    NULL,
     NULL,
     hInstance,
     NULL);
@@ -905,7 +952,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 
   // Pokazanie okinka na ekranie
   ShowWindow(hWnd,SW_SHOW);
-  //ShowWindow(hWnd2,SW_SHOW);
+  ShowWindow(hWnd2,SW_SHOW);
   SetForegroundWindow(hWnd);
   SetFocus(hWnd);
 
