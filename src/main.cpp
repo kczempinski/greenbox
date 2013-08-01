@@ -81,17 +81,6 @@ void xEndCalibrate()
     }
   }
 
-  //Create Histogram for display
- /* for(int i=0;i<256;i++)
-  {
-    for(int j=0;j<256;j++)
-    {
-      g_pRGBHistogramSample[(i*256+j)*3+0] = ppHist[i][j]*256/iMax;
-      g_pRGBHistogramSample[(i*256+j)*3+1] = ppHist[i][j]*256/iMax;
-      g_pRGBHistogramSample[(i*256+j)*3+2] = ppHist[i][j]*256/iMax;
-    }
-  } */
-
   //Deallokacje Pamieci
   for(int i=0;i<256;i++)
   {
@@ -312,12 +301,7 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
       pRGBDsrSample[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
       pRGBDsrSample[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
       pRGBDsrSample[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
-	  //g_temp=pRGBDsrSample;
-/*
-	  g_last[(y*iWidth+x)*3+0] = pRGBSrcSample[(y*iWidth+x)*3+0]; //Przepisanie s³adowej B
-	  g_last[(y*iWidth+x)*3+1] = pRGBSrcSample[(y*iWidth+x)*3+1]; //Przepisanie s³adowej G
-	  g_last[(y*iWidth+x)*3+2] = pRGBSrcSample[(y*iWidth+x)*3+2]; //Przepisanie s³adowej R
-*/
+
 	}
   }
 
@@ -357,24 +341,7 @@ void DoSomeThingWithSample(unsigned char* pRGBSrcSample,unsigned char* pRGBDsrSa
 							float Y = 0.299f*R+0.587f*G+0.114f*B;
 							float U = -0.147f*R-0.289f*G+0.437f*B;
 							float V = 0.615f*R-0.515f*G+0.100f*B;
-				   /*
-					if((U<0)&&(V<0))
-					{
-					
-					g_last[(i*iWidth+j)*3+0] = g_pRGBBack[(i*g_iBackWidth+j)*3+0]; //0;
-					g_last[(i*iWidth+j)*3+1] = g_pRGBBack[(i*g_iBackWidth+j)*3+1]; // 0;
-					g_last[(i*iWidth+j)*3+2] = g_pRGBBack[(i*g_iBackWidth+j)*3+2]; //0;
 
-					}
-					else
-					{
-					
-					g_last[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
-					g_last[(i*iWidth+j)*3+1] = pRGBDsrSample[(i*iWidth+j)*3+1];
-					g_last[(i*iWidth+j)*3+2] =pRGBDsrSample[(i*iWidth+j)*3+2];
-					} 
-					
-				  */
 
 					
 					g_last[(i*iWidth+j)*3+0] = pRGBDsrSample[(i*iWidth+j)*3+0];
@@ -448,7 +415,6 @@ void xInitCamera(int iDevice, int iWidth, int iHeight)
   width = VI.getWidth(iDevice);
   height = VI.getHeight(iDevice);
   size = VI.getSize(iDevice); // size to initialize `
-  //VI.setUseCallback(true);
 }
 
 void xGetFrame(unsigned char* pRGBSample)
@@ -600,7 +566,6 @@ HWND hWndButton;
 
     break;
   case WM_PAINT:
-  //  xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,g_iWidth,g_iHeight); //Narysowanie naszego buffora próbek obrazu na okienku
     xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Narysowanie naszego buffora próbek obrazu na okienku
       break;
     break;
@@ -611,14 +576,10 @@ HWND hWndButton;
       xGetFrame(g_pRGBOriginalSample);  //Pobranie 1 ramki obrazu z kamery
 	  
       DoSomeThingWithSample(g_pRGBOriginalSample,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wywo³anie procedury przetwarzaj¹cej obraz
-    //  xDisplayBmpOnWindow(hwnd,0,0,g_pRGBProcesedSample,g_iWidth,g_iHeight); //Wyœwitlenie 1 ramki obrazu na okienku
-	  if (combined) xDisplayBmpOnWindow(hwnd,0,0,g_last,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
-	  if (back) {
-		  if(still) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBBack,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
-		  //if(gl) xDisplayBmpOnWindow(hwnd,0,0,data,g_iWidth,g_iHeight);
-	  }
-	  if (cam) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
-	  if (filtered) xDisplayBmpOnWindow(hwnd,0,0,g_temp,g_iWidth,g_iHeight); //Wyœwitlenie zmodyfikowanej ramki obrazu na okienku w innym miejscu
+	  if (combined) xDisplayBmpOnWindow(hwnd,0,0,g_last,g_iWidth,g_iHeight); 
+	  if (back) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBBack,g_iWidth,g_iHeight); 
+	  if (cam) xDisplayBmpOnWindow(hwnd,0,0,g_pRGBOriginalSample,g_iWidth,g_iHeight); 
+	  if (filtered) xDisplayBmpOnWindow(hwnd,0,0,g_temp,g_iWidth,g_iHeight); 
       break;
     }
     break;
@@ -786,11 +747,6 @@ HWND hWndButton;
 					if(strstr(ofn.lpstrFile,".bmp"))	  
 					g_pRGBBack = ReadBmpFromFile(ofn.lpstrFile,g_iBackWidth, g_iBackHeight);
 
-					//if(!strstr(ofn.lpstrFile,".bmp")&&!strstr(ofn.lpstrFile,".ppm"))
-						//MessageBox(0,TEXT("Why ya clickin if not openin, dude?"),TEXT("WTF?"),MB_OK);
-
-					
-
 					break;
 			  }
 	    }
@@ -955,7 +911,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 
   // Pokazanie okinka na ekranie
   ShowWindow(hWnd,SW_SHOW);
-  //ShowWindow(hWnd2,SW_SHOW);
   SetForegroundWindow(hWnd);
   SetFocus(hWnd);
 
