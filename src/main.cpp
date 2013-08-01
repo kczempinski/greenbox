@@ -705,7 +705,7 @@ HWND hWndButton;
 			  PostQuitMessage(0);
 			  break;
 		  case ID_MENU_ABOUT:
-			  MessageBox(0,TEXT("Coded by\nKamil Czempinski and Marcin Nozynski\n\nversion 0.97 Beta (pre-release)"),TEXT("About"),MB_OK);//skad Marcin te wersje bierzesz? :D
+			  MessageBox(0,TEXT("Coded by\nKamil Czempinski and Marcin Nozynski\n\nversion 0.98.1 Beta (pre-release)"),TEXT("About"),MB_OK);//skad Marcin te wersje bierzesz? :D
 			  break;
 		  case ID_MENU_LOADBACKGROUND:
 			  {
