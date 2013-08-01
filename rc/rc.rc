@@ -20,9 +20,9 @@ BEGIN
 	POPUP "&Background"
 		BEGIN
 		MENUITEM "Still image from BPM/PPM file",ID_STILL
-		MENUITEM "Open GL animated",ID_GL, CHECKED
+		MENUITEM "Open GL animated",ID_GL
 		MENUITEM "White",ID_WHITE
-		MENUITEM "Black",ID_BLACK
+		MENUITEM "Black",ID_BLACK, CHECKED
 		END
 	POPUP "&Mask"
 		BEGIN
