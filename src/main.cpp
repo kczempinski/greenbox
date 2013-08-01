@@ -45,13 +45,15 @@ bool back;
 bool cam;
 bool filtered;
 
-bool black=1;
+bool black=0;
 bool white=0;
 bool still=0;
-bool gl=0;
+bool gl=1;
 
 int maskSize=0;		
 int mask=1;
+
+HWND hWnd, hWnd2;
 
 void xEndCalibrate()
 {
@@ -651,6 +653,7 @@ HWND hWndButton;
 				CheckMenuItem(GetMenu(hwnd),ID_CAM,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_COMB,MF_UNCHECKED);
 				CheckMenuItem(GetMenu(hwnd),ID_FILTERED,MF_UNCHECKED);
+				ShowWindow(hWnd2,SW_SHOW);
 				break;
 			case ID_CAM:
 				cam=true;
@@ -741,7 +744,7 @@ HWND hWndButton;
 			  PostQuitMessage(0);
 			  break;
 		  case ID_MENU_ABOUT:
-			  MessageBox(0,TEXT("Coded by\nKamil Czempiñski and Marcin No¿yñski\n\nversion 0.97 Beta (pre-release)"),TEXT("About"),MB_OK);
+			  MessageBox(0,TEXT("Coded by\nKamil Czempinski and Marcin Nozynski\n\nversion 0.97 Beta (pre-release)"),TEXT("About"),MB_OK);//skad Marcin te wersje bierzesz? :D
 			  break;
 		  case ID_MENU_LOADBACKGROUND:
 			  {
@@ -889,7 +892,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
   if ( !RegisterClass( &wc2 ) ) return( FALSE );
 
   // Tworzenie g³ównego okna aplikacji
-  HWND hWnd = CreateWindow(
+   hWnd = CreateWindow(
     GRINBOX_APP_CLASS_NAME,
     GRINBOX_APP_WINDOW_NAME,
     WS_OVERLAPPEDWINDOW,
@@ -902,7 +905,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     hInstance,
     NULL);
 
-  HWND hWnd2 = CreateWindow(
+   hWnd2 = CreateWindow(
     "Open GL",
     GRINBOX_APP_GL_WINDOW,
     WS_OVERLAPPEDWINDOW,
@@ -952,7 +955,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 
   // Pokazanie okinka na ekranie
   ShowWindow(hWnd,SW_SHOW);
-  ShowWindow(hWnd2,SW_SHOW);
+  //ShowWindow(hWnd2,SW_SHOW);
   SetForegroundWindow(hWnd);
   SetFocus(hWnd);
 
@@ -972,7 +975,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 	  {
 		  if(gl) {DrawGLScene();
 		 glReadBuffer(GL_FRONT);
-		glReadPixels(0,0,g_iWidth,g_iHeight,GL_RGB,GL_UNSIGNED_INT,&data[0]);
+		glReadPixels(0,0,g_iWidth,g_iHeight,GL_BGR_EXT,GL_UNSIGNED_INT,&data[0]);
 		SwapBuffers(hDC);}
 
 		  
